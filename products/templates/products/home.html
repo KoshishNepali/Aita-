@@ -1,0 +1,41 @@
+{% extends "products/base.html" %}
+{% load static %}
+
+{% block title %}Aita Sushi &amp; Pookie House | Home{% endblock %}
+
+{% block page_css %}
+  <link rel="stylesheet" href="{% static 'products/css/home_page.css' %}" />
+{% endblock %}
+
+{% block content %}
+<main class="main-content">
+  <section class="hero-section page-container">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <h1 class="hero-title">
+          Fresh Sushi,<br />
+          <span class="hero-accent">Cozy Bowls</span>
+        </h1>
+        <p class="hero-description">
+          Experience the art of Japanese minimalism on a plate. From hand-rolled nigiri to our signature warm pookie bowls.
+        </p>
+        <div class="hero-actions">
+          <a href="{% url 'cart' %}" class="btn btn-primary btn-large">Order Now</a>
+          <a href="{% url 'menu' %}" class="btn btn-ghost btn-large">View Menu</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-image-stack">
+          <div class="hero-image-card hero-image-top">
+            <img class="media-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqDSM8-Fv4bzaGEBLz2A04vBRSC2KChJD1uspVWLDmGOp8tPFFCo0LA4Opo8eGQ_Ud4l1W2mDPOK_v65BScEqHwpT8VXkq3Yok2h1DpRNQMHen2CxpAi5YfnJcylugyXzbLgO5dqiQp1GxY-p_QnCADrYBgmCk0jD0kxtWTqNpYspdonnX-fgBGeK_BS6-RqPW5PISv2YKYOwy4lTkoaFVGH1xO7ZH-SjDNn8w2kiXsaPAiMMRW73KLkunadZEWXfsSOtXmUKHpA" alt="Premium assorted nigiri sushi on a textured ceramic plate" />
+          </div>
+          <div class="hero-image-card hero-image-bottom">
+            <img class="media-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHlDlC1V99AYtzGkV4Vx56H5ZdqrP_XBOnrboYe5WMocl5NmjBVT_HtDCp7OpBZ6rle_PS62Gi1hR1EMMoTUTw2W-AhejDadk_75B65EohsF-e4BlqFk_3ZSpCgaz8rTbYKI7N_MXBQTIfM3xfwm8HnO9uYLD5Ma7Fflmo999RYeuhsHsO4J8GM7cgRstw3zhpSHUEDPTKhuYekIBGbnlywvZCA-CWqDRB7KlDI0V1tLO9itRCvNklqvT7Nw0Pv2GsZuz1QQkEzg" alt="Healthy poke bowl with tuna, avocado, and sesame" />
+          </div>
+          <div class="hero-glow"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}

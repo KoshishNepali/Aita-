@@ -1,0 +1,157 @@
+﻿{% extends "products/base.html" %}
+{% load static currency %}
+
+{% block title %}Orders{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'orders/css/order_page.css' %}" />
+{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block content %}
+<main class="orders-page">
+  <section class="orders-shell">
+    <header class="orders-head">
+      <h1 class="orders-title">Your Orders</h1>
+      <p class="orders-subtitle">Review your recent culinary journeys at Aita Sushi &amp; Pookie House. From signature rolls to comforting bowls, tracked in real-time.</p>
+    </header>
+
+    {% if latest_order %}
+      <section class="orders-grid">
+        <article class="recent-order-card">
+          <div class="recent-order-top">
+            <div>
+              <p class="eyebrow">Most Recent</p>
+              <h2>Order #AS-{{ latest_order.id }}</h2>
+              <p class="recent-order-date">Placed on {{ latest_order.created_at|date:"M d, Y · g:i A" }}</p>
+            </div>
+            <span class="order-pill {{ latest_order.status }}">{{ latest_order.status|upper }}</span>
+          </div>
+
+          <div class="recent-order-items">
+            {% for entry in order_preview %}
+              <article class="recent-item-row">
+                <div class="recent-item-media">
+                  {% if entry.item.product.image %}
+                    <img src="{{ entry.item.product.image_src }}" alt="{{ entry.item.product.name }}" />
+                  {% endif %}
+                </div>
+                <div class="recent-item-copy">
+                  <h3>{{ entry.item.product.name }}{% if entry.item.quantity > 1 %} (x{{ entry.item.quantity }}){% endif %}</h3>
+                  <p>{{ entry.item.selected_option }}</p>
+                </div>
+                <div class="recent-item-price">{{ entry.line_total|npr }}</div>
+              </article>
+            {% empty %}
+              <p class="empty-inline">No items in this order.</p>
+            {% endfor %}
+          </div>
+
+          <div class="recent-order-bottom">
+            <div>
+              <span class="block-label">Total Amount</span>
+              <strong class="recent-total">{{ latest_order.total_amount|npr }}</strong>
+            </div>
+            <a class="reorder-btn" href="{% url 'menu' %}">Reorder Now</a>
+          </div>
+        </article>
+
+        <aside class="summary-rail">
+          <section class="summary-card">
+            <h2 class="summary-title">Order Summary</h2>
+            <div class="summary-list">
+              <div class="summary-row"><span>Total Orders</span><strong>{{ total_orders }}</strong></div>
+              <div class="summary-row"><span>Lifetime Spent</span><strong>{{ lifetime_spent|npr }}</strong></div>
+              <div class="summary-row"><span>Loyalty Points</span><strong class="primary-text">{{ loyalty_points }} pts</strong></div>
+            </div>
+          </section>
+
+          <section class="support-card">
+            <div class="support-head">
+              <div class="support-icon-wrap"><span class="material-symbols-outlined">help</span></div>
+              <div>
+                <p class="support-title">Need help with an order?</p>
+                <p class="support-subtitle">Our concierges are available 24/7</p>
+              </div>
+            </div>
+            <a class="support-btn" href="#">Contact Support</a>
+          </section>
+        </aside>
+      </section>
+    {% endif %}
+
+    <section class="history-wrap">
+      <div class="history-head">
+        <h2 class="history-title">Past Orders</h2>
+        <div class="history-filter">
+          <button class="history-filter-btn is-selected" type="button">All</button>
+          <button class="history-filter-btn" type="button">Completed</button>
+        </div>
+      </div>
+
+      <div class="history-table-scroll">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Date</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders %}
+              <tr>
+                <td class="order-id">#AS-{{ order.id }}</td>
+                <td class="muted-text">{{ order.created_at|date:"M d, Y" }}</td>
+                <td class="items-text">
+                  {% for item in order.items.all %}
+                    {{ item.product.name }}{% if not forloop.last %}, {% endif %}
+                  {% empty %}
+                    No items
+                  {% endfor %}
+                </td>
+                <td class="order-total">{{ order.total_amount|npr }}</td>
+                <td><span class="tiny-status {{ order.status }}">{{ order.status }}</span></td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5">No orders found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="history-footer">
+        <button class="history-more-btn" type="button">Show More History</button>
+      </div>
+    </section>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner page-container">
+    <div>
+      <div class="footer-brand">Aita Sushi &amp; Pookie House</div>
+      <p class="footer-copy">Elevated Japanese cuisine served with a touch of warmth and modern elegance.</p>
+    </div>
+
+    <div class="footer-links-col">
+      <p class="footer-label">Navigation</p>
+      <a class="footer-link" href="{% url 'menu' %}">Menu</a>
+      <a class="footer-link is-active" href="{% url 'orders' %}">Orders</a>
+      <a class="footer-link" href="#">Contact</a>
+    </div>
+
+    <div class="footer-links-col">
+      <p class="footer-label">Legal</p>
+      <a class="footer-link" href="#">Privacy</a>
+      <a class="footer-link" href="#">Terms</a>
+      <p class="footer-meta">© 2024 Aita Sushi &amp; Pookie House. Crafted with Ma.</p>
+    </div>
+  </div>
+</footer>
+{% endblock %}

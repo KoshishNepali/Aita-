@@ -1,0 +1,101 @@
+﻿{% extends "products/base.html" %}
+{% load static currency %}
+
+{% block title %}Cart{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'products/css/cart_page.css' %}" />
+{% endblock %}
+
+{% block footer %}
+  {% include 'layouts/footer.html' %}
+{% endblock %}
+
+{% block content %}
+<main class="cart-page">
+  <section class="cart-shell">
+    <header class="cart-head">
+      <h1 class="page-title">Your Selection</h1>
+      <p class="page-subtitle">Refining your curated dining experience.</p>
+    </header>
+
+    {% if cart_items %}
+      <div class="cart-layout">
+        <div class="cart-list">
+          {% for item in cart_items %}
+            <article class="cart-item-card">
+              <div class="item-media-wrap">
+                {% if item.product.image %}
+                  <img class="item-media" src="{{ item.product.image_src }}" alt="{{ item.product.name }}" />
+                {% else %}
+                  <div class="item-media item-media-placeholder">No image</div>
+                {% endif %}
+              </div>
+
+              <div class="item-main">
+                <div class="item-head-row">
+                  <div>
+                    <h2 class="item-name">{{ item.product.name }}</h2>
+                    <p class="item-option">{{ item.selected_option|upper }}</p>
+                  </div>
+                  <p class="item-price">{{ item.line_total|npr }}</p>
+                </div>
+
+                <div class="item-footer-row">
+                  <div class="qty-pill" aria-label="Quantity control">
+                    <form method="post" action="{% url 'update_cart_item_quantity' item.id %}" class="qty-form">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="decrease" />
+                      <button type="submit" class="qty-btn" aria-label="Decrease quantity">-</button>
+                    </form>
+                    <span class="qty-value">{{ item.quantity }}</span>
+                    <form method="post" action="{% url 'update_cart_item_quantity' item.id %}" class="qty-form">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="increase" />
+                      <button type="submit" class="qty-btn" aria-label="Increase quantity">+</button>
+                    </form>
+                  </div>
+
+                  <form method="post" action="{% url 'remove_cart_item' item.id %}" class="remove-form">
+                    {% csrf_token %}
+                    <button type="submit" class="remove-link" aria-label="Remove item">
+                      <span class="material-symbols-outlined">delete</span>
+                      <span>Remove</span>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+
+        <aside class="summary-card">
+          <h2 class="summary-head">Order Summary</h2>
+
+          <div class="summary-rows">
+            <p><span>Subtotal</span><strong>{{ total_price|npr }}</strong></p>
+            <p><span>Delivery Fee</span><strong>{{ delivery_fee|npr }}</strong></p>
+            <p><span>Service Tax (10%)</span><strong>{{ service_tax|npr }}</strong></p>
+          </div>
+
+          <p class="summary-total"><span>Total</span><strong>{{ grand_total|npr }}</strong></p>
+
+          <a class="checkout-btn" href="{% url 'checkout' %}">Checkout</a>
+          <a class="continue-link" href="{% url 'menu' %}">Continue Browsing Menu</a>
+
+          <div class="delivery-note">
+            <span class="material-symbols-outlined">local_shipping</span>
+            <span>Estimated delivery time: 25 - 35 mins to your location.</span>
+          </div>
+        </aside>
+      </div>
+
+    {% else %}
+      <section class="empty-card">
+        <h2>Your cart is empty</h2>
+        <p>Add some products from the menu to continue.</p>
+      </section>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

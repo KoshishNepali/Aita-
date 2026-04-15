@@ -1,0 +1,267 @@
+﻿:root {
+  --base-bg: #f7f8fa;
+  --base-fg: #1f2430;
+  --base-border: #e6e8ec;
+  --base-accent: #ac2a2e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--base-bg);
+  color: var(--base-fg);
+}
+
+.base-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.base-navbar,
+.base-footer {
+  width: 100%;
+}
+
+.base-navbar {
+  background: rgba(255, 248, 242, 0.8);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 32px rgba(30, 27, 24, 0.06);
+}
+
+.base-navbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.base-brand {
+  text-decoration: none;
+  color: var(--base-fg);
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+}
+
+.base-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.base-nav-link {
+  text-decoration: none;
+  color: var(--base-fg);
+  font-family: "Manrope", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.base-nav-link:hover {
+  color: #0b5fff;
+}
+
+.base-nav-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.base-icon-link {
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 1px solid var(--base-border);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--base-fg);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.base-icon-link:hover {
+  border-color: #0b5fff;
+  color: #0b5fff;
+  transform: translateY(-1px);
+}
+
+.base-icon-link .fa {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* Shared navbar classes used by the auth-aware navbar include. */
+.page-container,
+.container {
+  width: min(1200px, 100% - 2rem);
+  margin: 0 auto;
+}
+
+.top-nav {
+  width: 100%;
+  background: rgba(255, 248, 242, 0.8);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 32px rgba(30, 27, 24, 0.06);
+}
+
+.top-nav-inner {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.brand {
+  color: var(--base-fg);
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.main-nav-links,
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-link,
+.desktop-nav-link {
+  text-decoration: none;
+  color: var(--base-fg);
+  font-family: "Manrope", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover,
+.desktop-nav-link:hover {
+  color: var(--base-accent);
+}
+
+.nav-link.is-active,
+.desktop-nav-link.is-active {
+  color: var(--base-accent);
+  font-weight: 700;
+}
+
+.nav-actions,
+.icon-group,
+.nav-icons,
+.auth-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.icon-btn {
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 1px solid var(--base-border);
+  border-radius: 999px;
+  color: var(--base-fg);
+  background: #fff;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -0.45rem;
+  right: -0.45rem;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0 0.2rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  line-height: 1rem;
+  text-align: center;
+  color: #fff;
+  background: #d92d20;
+}
+
+.nav-divider {
+  width: 1px;
+  height: 22px;
+  background: var(--base-border);
+}
+
+.btn {
+  text-decoration: none;
+  font-family: "Manrope", sans-serif;
+  font-weight: 600;
+}
+
+.btn-text,
+.btn-link {
+  color: var(--base-fg);
+}
+
+.btn-primary {
+  color: #fff;
+  background: #111827;
+  padding: 0.45rem 0.9rem;
+}
+
+.btn-pill {
+  border-radius: 999px;
+}
+
+.site-footer,
+.base-footer {
+  width: 100%;
+  background: #f9f2ec;
+  border-top: 1px solid #eaded1;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .base-navbar,
+  .base-footer {
+    overflow-x: clip;
+  }
+
+  .base-navbar-inner {
+    flex-wrap: wrap;
+    row-gap: 0.65rem;
+  }
+
+  .base-nav-links {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .base-nav-icons {
+    margin-left: auto;
+  }
+
+  .main-nav-links,
+  .desktop-nav,
+  .auth-actions,
+  .nav-divider {
+    display: none;
+  }
+}

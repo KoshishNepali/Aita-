@@ -1,0 +1,84 @@
+.admin-auth-page {
+  min-height: calc(100vh - 72px);
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+  background: #f9f2ec;
+}
+
+.admin-auth-card {
+  width: min(100%, 460px);
+  background: #fff;
+  border: 1px solid #eaded1;
+  border-radius: 18px;
+  padding: 1.5rem;
+  box-shadow: 0 14px 28px rgba(30, 27, 24, 0.08);
+}
+
+.admin-auth-card h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  letter-spacing: -0.03em;
+  color: #1f1915;
+}
+
+.admin-auth-card p {
+  margin: 0.5rem 0 1.2rem;
+  color: #705f54;
+}
+
+.admin-auth-form {
+  display: grid;
+  gap: 0.95rem;
+}
+
+.field-group {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.field-group label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #584a42;
+}
+
+.field-group input {
+  width: 100%;
+  border: 1px solid #e6d9cb;
+  border-radius: 10px;
+  padding: 0.8rem 0.9rem;
+  font: inherit;
+}
+
+.field-group .errorlist,
+.error-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: #b42318;
+  font-size: 0.85rem;
+}
+
+.admin-auth-btn {
+  border: none;
+  border-radius: 999px;
+  background: #ac2a2e;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+}
+
+.auth-link-row {
+  margin: 1rem 0 0;
+  font-size: 0.92rem;
+  color: #705f54;
+}
+
+.auth-link-row a {
+  color: #ac2a2e;
+  font-weight: 700;
+  text-decoration: none;
+}

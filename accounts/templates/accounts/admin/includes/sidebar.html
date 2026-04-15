@@ -1,0 +1,34 @@
+{% with current=admin_active|default:request.resolver_match.url_name %}
+<aside class="sidebar">
+  <div class="sidebar-brand brand-block">
+    <h1 class="sidebar-title brand-title">Aita <span class="sidebar-title-accent">Sushi</span></h1>
+    <p class="sidebar-subtitle brand-subtitle">Management Portal</p>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="sidebar-link nav-item{% if current == 'dashboard' or current == 'admin_dashboard' or current == 'admin_dashboard_legacy' %} is-active{% endif %}" href="{% url 'admin_dashboard' %}">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span>Dashboard</span>
+    </a>
+    <a class="sidebar-link nav-item{% if current == 'products' or current == 'manage_products' %} is-active{% endif %}" href="{% url 'manage_products' %}">
+      <span class="material-symbols-outlined">inventory_2</span>
+      <span>Manage Products</span>
+    </a>
+    <a class="sidebar-link nav-item{% if current == 'orders' or current == 'order_management' %} is-active{% endif %}" href="{% url 'order_management' %}">
+      <span class="material-symbols-outlined">shopping_bag</span>
+      <span>Orders</span>
+    </a>
+    <a class="sidebar-link nav-item{% if current == 'users' or current == 'user_management' %} is-active{% endif %}" href="{% url 'user_management' %}">
+      <span class="material-symbols-outlined">group</span>
+      <span>Users</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a class="sidebar-link nav-item logout" href="{% url 'logout' %}">
+      <span class="material-symbols-outlined">logout</span>
+      <span>Logout</span>
+    </a>
+  </div>
+</aside>
+{% endwith %}

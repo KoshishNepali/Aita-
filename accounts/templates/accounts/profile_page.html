@@ -1,0 +1,294 @@
+{% extends "products/base.html" %}
+{% load static currency %}
+
+{% block title %}Profile{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'accounts/css/profile_page.css' %}?v=20260415" />
+{% endblock %}
+
+{% block footer %}
+  {% include 'layouts/footer.html' %}
+{% endblock %}
+
+{% block content %}
+<main class="profile-page">
+  <section class="profile-shell page-container">
+    <header class="profile-head">
+      <div>
+        <h1 class="profile-title">My Account</h1>
+        <p class="profile-subtitle">Manage your preferences, delivery addresses, and artisanal dining history at Aita Sushi.</p>
+      </div>
+
+      <div class="member-block">
+        <span class="member-label">Member Since</span>
+        <strong>{{ member_since|date:"F Y" }}</strong>
+      </div>
+    </header>
+
+    <section class="profile-grid">
+      <article class="profile-card main-card">
+        <div class="avatar-wrap">
+          {% if profile_photo %}
+            <img class="avatar-image" src="{{ profile_photo.url }}" alt="{{ display_name }} profile photo" />
+          {% else %}
+            <div class="avatar-circle">{{ initials }}</div>
+          {% endif %}
+
+          <form class="avatar-upload-form" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="profile_action" value="upload-photo" />
+            <input class="avatar-file-input" id="profile-photo-input" type="file" name="profile_photo" accept="image/*" />
+            <label class="avatar-edit" for="profile-photo-input" aria-label="Upload profile photo">
+              <span class="material-symbols-outlined">photo_camera</span>
+            </label>
+          </form>
+        </div>
+
+        <div class="profile-info">
+          <div class="info-block">
+            <span class="info-label">Full Name</span>
+            <h2 class="info-value">{{ display_name }}</h2>
+          </div>
+
+          <div class="profile-details-grid">
+            <div>
+              <span class="info-label">Phone Number</span>
+              <p class="detail-text">{{ user.phone|default:'+1 (555) 234-8901' }}</p>
+            </div>
+            <div>
+              <span class="info-label">Email Address</span>
+              <p class="detail-text">{{ user.email|default:'h.nakamura@ma-studio.com' }}</p>
+            </div>
+            <div class="address-block">
+              <span class="info-label">Primary Address</span>
+              <p class="detail-text">{{ user.address|default:'742 Evergreen Terrace, West Village New York, NY 10014' }}</p>
+            </div>
+          </div>
+
+          <button class="edit-profile-btn" type="button" data-profile-toggle="edit-profile">
+            <span class="material-symbols-outlined">edit</span>
+            <span>Edit Profile</span>
+          </button>
+        </div>
+      </article>
+
+      <aside class="side-rail">
+        <article class="points-card">
+          <div class="points-inner">
+            <div>
+              <span class="points-label">Pookie Points</span>
+              <div class="points-value">{{ loyalty_points }}</div>
+            </div>
+            <span class="points-star">★</span>
+          </div>
+          <div class="points-bar"><span style="width: 72%"></span></div>
+          <p class="points-caption">550 points until your next free Omakase roll</p>
+        </article>
+
+        <article class="quick-links-card">
+          <a href="{% url 'orders' %}"><span><span class="material-symbols-outlined">history</span> Order History</span><span class="chevron">›</span></a>
+          <button type="button" data-profile-toggle="payment-methods"><span><span class="material-symbols-outlined">payments</span> Payment Methods</span><span class="chevron">›</span></button>
+          <button type="button" data-profile-toggle="account-settings"><span><span class="material-symbols-outlined">settings</span> Account Settings</span><span class="chevron">›</span></button>
+        </article>
+      </aside>
+    </section>
+
+    <section class="profile-actions-section" id="profile-actions" hidden>
+      <section class="profile-panel is-active" data-panel="edit-profile" hidden>
+        <div class="panel-header">
+          <div>
+            <span class="panel-eyebrow">Edit Profile</span>
+            <h2>Update your details</h2>
+            <p>Change your name, email, phone number, and address.</p>
+          </div>
+        </div>
+
+        <form method="post" class="profile-form">
+          {% csrf_token %}
+          <input type="hidden" name="profile_action" value="edit-profile" />
+
+          {% if profile_edit_form.non_field_errors %}
+            <div class="form-errors">{{ profile_edit_form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="form-grid">
+            <div class="field-group field-group-wide">
+              {{ profile_edit_form.full_name.label_tag }}
+              {{ profile_edit_form.full_name }}
+              {{ profile_edit_form.full_name.errors }}
+            </div>
+            <div class="field-group">
+              {{ profile_edit_form.email.label_tag }}
+              {{ profile_edit_form.email }}
+              {{ profile_edit_form.email.errors }}
+            </div>
+            <div class="field-group">
+              {{ profile_edit_form.phone.label_tag }}
+              {{ profile_edit_form.phone }}
+              {{ profile_edit_form.phone.errors }}
+            </div>
+            <div class="field-group field-group-wide">
+              {{ profile_edit_form.address.label_tag }}
+              {{ profile_edit_form.address }}
+              {{ profile_edit_form.address.errors }}
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="save-button">Save Changes</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="profile-panel" data-panel="payment-methods" hidden>
+        <div class="panel-header">
+          <div>
+            <span class="panel-eyebrow">Payment Methods</span>
+            <h2>Choose how you pay</h2>
+            <p>Pick eSewa or Cash on Delivery for future orders.</p>
+          </div>
+        </div>
+
+        <form method="post" class="profile-form">
+          {% csrf_token %}
+          <input type="hidden" name="profile_action" value="payment-methods" />
+
+          {% if payment_form.non_field_errors %}
+            <div class="form-errors">{{ payment_form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="payment-grid">
+            {% for radio in payment_form.payment_method %}
+              <label class="payment-option">
+                {{ radio.tag }}
+                <span class="payment-option-body">
+                  <span class="payment-option-title">{{ radio.choice_label }}</span>
+                  <span class="payment-option-subtitle">
+                    {% if radio.choice_value == 'esewa' %}
+                      Pay instantly with eSewa.
+                    {% else %}
+                      Pay when your order is delivered.
+                    {% endif %}
+                  </span>
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+          {{ payment_form.payment_method.errors }}
+
+          <div class="form-actions">
+            <button type="submit" class="save-button">Save Changes</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="profile-panel" data-panel="account-settings" hidden>
+        <div class="panel-header">
+          <div>
+            <span class="panel-eyebrow">Account Settings</span>
+            <h2>Change your password</h2>
+            <p>Keep your account secure by updating your password regularly.</p>
+          </div>
+        </div>
+
+        <form method="post" class="profile-form">
+          {% csrf_token %}
+          <input type="hidden" name="profile_action" value="account-settings" />
+
+          {% if password_form.non_field_errors %}
+            <div class="form-errors">{{ password_form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="form-grid">
+            <div class="field-group field-group-wide">
+              {{ password_form.old_password.label_tag }}
+              {{ password_form.old_password }}
+              {{ password_form.old_password.errors }}
+            </div>
+            <div class="field-group">
+              {{ password_form.new_password1.label_tag }}
+              {{ password_form.new_password1 }}
+              {{ password_form.new_password1.errors }}
+            </div>
+            <div class="field-group">
+              {{ password_form.new_password2.label_tag }}
+              {{ password_form.new_password2 }}
+              {{ password_form.new_password2.errors }}
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="save-button">Save Changes</button>
+          </div>
+        </form>
+      </section>
+    </section>
+
+    <section class="recommend-section">
+      <div class="recommend-head">
+        <h2>Recommended for You</h2>
+        <a href="{% url 'menu' %}">View Menu</a>
+      </div>
+
+      <div class="recommend-grid">
+        {% for product in recommended_products %}
+          <article class="recommend-card">
+            <div class="recommend-image-wrap">
+              {% if product.image %}
+                <img src="{{ product.image_src }}" alt="{{ product.name }}" />
+              {% endif %}
+            </div>
+            <div class="recommend-body">
+              <div class="recommend-row">
+                <h3>{{ product.name }}</h3>
+                <span class="recommend-price">{{ product.base_price|npr }}</span>
+              </div>
+              <p>{{ product.description|truncatewords:12 }}</p>
+              <a class="quick-add-btn" href="{% url 'product_detail' product.id %}">Quick Add</a>
+            </div>
+          </article>
+        {% empty %}
+          <p class="empty-state">No recommendations available right now.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </section>
+</main>
+
+<script>
+  (function () {
+    const profileActions = document.getElementById('profile-actions');
+    const toggleButtons = document.querySelectorAll('[data-profile-toggle]');
+    const panels = document.querySelectorAll('[data-panel]');
+    const photoInput = document.getElementById('profile-photo-input');
+
+    function openPanel(panelName) {
+      profileActions.hidden = false;
+      panels.forEach((panel) => {
+        const isActive = panel.dataset.panel === panelName;
+        panel.hidden = !isActive;
+        panel.classList.toggle('is-active', isActive);
+      });
+      profileActions.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    toggleButtons.forEach((button) => {
+      button.addEventListener('click', () => openPanel(button.dataset.profileToggle));
+    });
+
+    if (photoInput) {
+      photoInput.addEventListener('change', () => {
+        if (photoInput.files && photoInput.files.length > 0) {
+          photoInput.closest('form').submit();
+        }
+      });
+    }
+
+    const initialPanel = '{{ active_tab|default:"" }}';
+    if (initialPanel) {
+      openPanel(initialPanel);
+    }
+  }());
+</script>
+{% endblock %}

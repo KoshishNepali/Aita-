@@ -1,0 +1,33 @@
+﻿{% extends "products/base.html" %}
+{% load static currency %}
+
+{% block title %}Product Detail{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'products/css/product_detail.css' %}" />
+{% endblock %}
+
+{% block content %}
+<main class="product-detail-page">
+  <section class="product-detail-shell">
+    <div class="product-image-wrap">
+      {% if product.image %}
+        <img src="{{ product.image_src }}" alt="{{ product.name }}" class="product-image" />
+      {% else %}
+        <div class="image-placeholder">Image unavailable</div>
+      {% endif %}
+    </div>
+
+    <div class="product-info">
+      <h1>{{ product.name }}</h1>
+      <p class="description">{{ product.description }}</p>
+      <p class="price">{{ product.base_price|npr }}</p>
+      <form method="post" action="{% url 'add_to_cart' product.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="selected_option" value="Standard" />
+        <button type="submit" class="add-to-cart-btn">Add to Cart</button>
+      </form>
+    </div>
+  </section>
+</main>
+{% endblock %}

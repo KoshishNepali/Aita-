@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Admin Login | Aita Sushi{% endblock %}
+
+{% block page_css %}
+  <link rel="stylesheet" href="{% static 'accounts/css/register.css' %}" />
+{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block content %}
+<header class="site-header">
+  <div class="header-inner page-shell">
+    <div class="brand">Aita Sushi &amp; Pookie House</div>
+
+    <nav class="header-nav">
+      <a class="back-link" href="/">Back to Home</a>
+    </nav>
+  </div>
+</header>
+
+<main class="register-main">
+  <section class="register-shell page-shell">
+    <div class="register-card">
+      <div class="visual-column">
+        <img
+          class="visual-image"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdh-7WKbUWcCKJb0kLnkaWvfj_Ru33b8bn5soQbosP3gUaN252DuRLVY5ocAmtcNJ1QkEs4LlrU-Gw_d8086e1KZtBPU-achGkrd-6ORhdIg-dwWnMgRg5Egk53QJGPA8Ig1zvM6JM0tJWneJ2vUKPyjQ9t6oMWWitCtAp9N_w4b6L6vkTGhcbRBhAjSLaeWLKMFdxU42VQPDl-UBR0f5c2BCZpNgJ8796CsDjjX-OEQ_nwzFndmoRqc48oe6c5ZNl2CXTgqNwCg"
+          alt="Artisan sushi platter on a dark ceramic plate with warm ambient lighting"
+        />
+        <div class="visual-overlay">
+          <h2>Admin <br />Access.</h2>
+          <p>Sign in with your admin account to manage the restaurant dashboard and operations.</p>
+        </div>
+      </div>
+
+      <div class="form-column">
+        <div class="form-head">
+          <h1>Admin Login</h1>
+          <p>Only admin users can access this portal.</p>
+        </div>
+
+        {% if messages %}
+          {% for message in messages %}
+            <p class="error-message">{{ message }}</p>
+          {% endfor %}
+        {% endif %}
+
+        {% if form.non_field_errors %}
+          {% for error in form.non_field_errors %}
+            <p class="error-message">{{ error }}</p>
+          {% endfor %}
+        {% endif %}
+
+        <form class="register-form" method="post">
+          {% csrf_token %}
+          <div class="field-group">
+            <label for="id_identifier">Username or Email</label>
+            {{ form.identifier }}
+            {{ form.identifier.errors }}
+          </div>
+
+          <div class="field-group">
+            <label for="id_password">Password</label>
+            {{ form.password }}
+            {{ form.password.errors }}
+          </div>
+
+          <button class="register-btn" type="submit">Login as Admin</button>
+
+          <p class="login-row">
+            No admin account?
+            <a href="{% url 'admin_register' %}">Admin Register</a>
+          </p>
+        </form>
+
+        <div class="trust-strip">
+          <span class="trust-item">
+            <span class="material-symbols-outlined">verified_user</span>
+            Secure Access
+          </span>
+          <span class="trust-item">
+            <span class="material-symbols-outlined">shield</span>
+            Admin Only
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}

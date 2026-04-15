@@ -1,0 +1,330 @@
+﻿{% extends "products/base.html" %}
+{% load static %}
+
+{% block title %}Admin Dashboard | Aita Sushi &amp; Pookie House{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'accounts/css/admin/admin_dashboard.css' %}" />
+  <style>
+    .base-header {
+      display: none !important;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    {% include "accounts/admin/includes/sidebar.html" %}
+
+    <main class="main-panel">
+      <header class="topbar">
+        <h2 class="topbar-title">Dashboard Overview</h2>
+        <div class="topbar-actions">
+          <div class="live-meta">
+            <span id="dashboard-loading" class="loading-spinner" aria-hidden="true"></span>
+            <span id="dashboard-last-updated" class="last-updated">Waiting for first sync...</span>
+          </div>
+          <button class="icon-button" type="button" aria-label="Notifications">
+            <span class="material-symbols-outlined">notifications</span>
+            <span class="notification-dot"></span>
+          </button>
+
+          <div class="profile-box">
+            <div class="profile-meta">
+              <p class="profile-name">Admin User</p>
+              <p class="profile-role">Store Manager</p>
+            </div>
+            <div class="profile-image-wrap">
+              <img class="profile-image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAk0KJQSuGLW0g-R8NEqbzOopvGFGzpAVIxogyd8ymk47CrXRO4M693o04nUSJBkD-7XO7mQSQUEZflUDZIAbpzEOIhQaPtm2YtP1fp9PtxJQqjQ8vPhLTdtbdAzoGIBku-FhDMR5TyjFUMbW4DdjpOzp1y_iaZJlxpGjG5B83qMCi0swf4R1P21_XJLYWZPH4LPWZ2z8PIOjLk1RHq9Ctzd7KhrKBC5kyrBq08gGexBSRTa5YeBCz6t8JX5AB6PtG3hIeQy0kvPw" alt="Admin Profile" />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="dashboard-content">
+        <div id="dashboard-error" class="dashboard-error" role="alert" hidden></div>
+
+        <section class="stats-grid">
+          <article class="stat-card">
+            <div>
+              <p class="stat-label">Total Revenue</p>
+              <h3 id="stat-revenue" class="stat-value">NPR 0.00</h3>
+              <p class="stat-trend positive">
+                <span class="material-symbols-outlined">trending_up</span>
+                <span>Auto-updated from live orders</span>
+              </p>
+            </div>
+            <div class="stat-icon-wrap primary">
+              <span class="material-symbols-outlined">payments</span>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div>
+              <p class="stat-label">Total Orders</p>
+              <h3 id="stat-orders" class="stat-value">0</h3>
+              <p class="stat-trend positive">
+                <span class="material-symbols-outlined">trending_up</span>
+                <span>Latest successful sync</span>
+              </p>
+            </div>
+            <div class="stat-icon-wrap secondary">
+              <span class="material-symbols-outlined">local_mall</span>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div>
+              <p class="stat-label">Total Users</p>
+              <h3 id="stat-users" class="stat-value">0</h3>
+              <p class="stat-trend negative">
+                <span class="material-symbols-outlined">sync</span>
+                <span>Includes latest registrations</span>
+              </p>
+            </div>
+            <div class="stat-icon-wrap primary">
+              <span class="material-symbols-outlined">person_add</span>
+            </div>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <article class="panel">
+            <header class="panel-header">
+              <h3 class="panel-title">Recent Orders</h3>
+              <a class="panel-link" href="#">View All</a>
+            </header>
+
+            <div class="table-wrap">
+              <table class="orders-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-orders-body">
+                  <tr>
+                    <td colspan="4" class="empty-row">Loading latest orders...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <aside class="panel mix-panel">
+            <h3 class="panel-title">Revenue Mix</h3>
+            <div class="mix-list">
+              {% for item in revenue_mix %}
+                <div>
+                  <div class="mix-head"><span>{{ item.category }}</span><strong>{{ item.percentage }}%</strong></div>
+                  <div class="progress-track"><div class="progress-fill tone-{{ forloop.counter }}" data-mix-width="{{ item.percentage }}"></div></div>
+                </div>
+              {% empty %}
+                <div>
+                  <div class="mix-head"><span>No sales data yet</span><strong>0%</strong></div>
+                  <div class="progress-track"><div class="progress-fill tone-1" data-mix-width="0"></div></div>
+                </div>
+              {% endfor %}
+            </div>
+            <p class="mix-note">{{ mix_note }}</p>
+          </aside>
+        </section>
+
+        <section class="products-section">
+          <header class="section-head">
+            <h3 class="section-title">Top Performing Products</h3>
+            <div class="carousel-actions">
+              <button class="circle-btn" type="button" aria-label="Previous"><span class="material-symbols-outlined">chevron_left</span></button>
+              <button class="circle-btn" type="button" aria-label="Next"><span class="material-symbols-outlined">chevron_right</span></button>
+            </div>
+          </header>
+
+          <div id="top-products-grid" class="products-grid">
+            <article class="product-card">
+              <div class="product-image-wrap"></div>
+              <h4 class="product-name">Loading products...</h4>
+              <p class="product-meta">Syncing with menu data</p>
+              <div class="product-footer">
+                <span class="product-price">NPR 0.00</span>
+                <span class="product-tag stable">Loading</span>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <footer class="dashboard-footer">
+        <div class="footer-inner">
+          <p class="footer-copy">&copy; 2024 Aita Sushi &amp; Pookie House. Crafted with Ma.</p>
+          <div class="footer-links">
+            <a class="footer-link" href="#">System Health</a>
+            <a class="footer-link" href="#">Privacy Policy</a>
+            <a class="footer-link" href="#">Terms of Service</a>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    const apiUrl = "{% url 'admin_dashboard_data' %}";
+    const usersEl = document.getElementById('stat-users');
+    const ordersEl = document.getElementById('stat-orders');
+    const revenueEl = document.getElementById('stat-revenue');
+    const tableBody = document.getElementById('recent-orders-body');
+    const topProductsGrid = document.getElementById('top-products-grid');
+    const loadingEl = document.getElementById('dashboard-loading');
+    const errorEl = document.getElementById('dashboard-error');
+    const lastUpdatedEl = document.getElementById('dashboard-last-updated');
+
+    function npr(value) {
+      return `NPR ${Number(value || 0).toFixed(2)}`;
+    }
+
+    function initializeServerMixBars() {
+      const bars = document.querySelectorAll('.progress-fill[data-mix-width]');
+      bars.forEach((bar) => {
+        const width = Number(bar.getAttribute('data-mix-width') || 0);
+        const safeWidth = Math.max(0, Math.min(100, width));
+        bar.style.width = `${safeWidth}%`;
+      });
+    }
+
+    function initials(name) {
+      if (!name) return '--';
+      const parts = name.trim().split(/\s+/).filter(Boolean);
+      const chars = parts.slice(0, 2).map((p) => p[0].toUpperCase());
+      return chars.join('') || name.slice(0, 2).toUpperCase();
+    }
+
+    function statusClass(status) {
+      const normalized = String(status || '').toLowerCase();
+      if (normalized === 'completed' || normalized === 'paid' || normalized === 'delivered') return 'delivered';
+      if (normalized === 'cancelled') return 'pending';
+      if (normalized === 'processing') return 'processing';
+      return 'pending';
+    }
+
+    function setLoading(isLoading) {
+      if (isLoading) {
+        loadingEl.classList.add('is-visible');
+      } else {
+        loadingEl.classList.remove('is-visible');
+      }
+    }
+
+    function setError(message) {
+      if (!message) {
+        errorEl.hidden = true;
+        errorEl.textContent = '';
+        return;
+      }
+      errorEl.hidden = false;
+      errorEl.textContent = message;
+    }
+
+    function renderRecentOrders(orders) {
+      if (!Array.isArray(orders) || !orders.length) {
+        tableBody.innerHTML = '<tr><td colspan="4" class="empty-row">No recent orders yet.</td></tr>';
+        return;
+      }
+
+      tableBody.innerHTML = orders.map((order) => {
+        const customerName = order.customer || 'Guest';
+        const pillClass = statusClass(order.status);
+        const statusLabel = (order.status || 'pending').replace(/_/g, ' ');
+        return `
+          <tr>
+            <td>#ORD-${order.id}</td>
+            <td>
+              <div class="customer">
+                <span class="customer-avatar">${initials(customerName)}</span>
+                <span>${customerName}</span>
+              </div>
+            </td>
+            <td><span class="status-pill ${pillClass}">${statusLabel}</span></td>
+            <td class="amount">${npr(order.amount)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderTopProducts(products) {
+      if (!Array.isArray(products) || !products.length) {
+        topProductsGrid.innerHTML = `
+          <article class="product-card">
+            <div class="product-image-wrap"></div>
+            <h4 class="product-name">No menu products available</h4>
+            <p class="product-meta">Add products in menu to see this section.</p>
+            <div class="product-footer">
+              <span class="product-price">NPR 0.00</span>
+              <span class="product-tag stable">Empty</span>
+            </div>
+          </article>
+        `;
+        return;
+      }
+
+      topProductsGrid.innerHTML = products.map((product) => {
+        const soldCount = Number(product.sold_count || 0);
+        const tagClass = soldCount > 0 ? 'trending' : 'stable';
+        const tagText = soldCount > 0 ? 'Trending' : 'New';
+        const imageSrc = product.image || '';
+
+        return `
+          <article class="product-card">
+            <div class="product-image-wrap">
+              ${imageSrc ? `<img class="product-image" src="${imageSrc}" alt="${product.name || 'Product'}" />` : ''}
+            </div>
+            <h4 class="product-name">${product.name || 'Unnamed Product'}</h4>
+            <p class="product-meta">Sold ${soldCount} times</p>
+            <div class="product-footer">
+              <span class="product-price">${npr(product.price)}</span>
+              <span class="product-tag ${tagClass}">${tagText}</span>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    async function refreshDashboard() {
+      setLoading(true);
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+        usersEl.textContent = String(data.users ?? 0);
+        ordersEl.textContent = String(data.orders ?? 0);
+        revenueEl.textContent = npr(data.revenue ?? 0);
+        renderRecentOrders(data.recent_orders || []);
+        renderTopProducts(data.top_products || []);
+        lastUpdatedEl.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+        setError('');
+      } catch (error) {
+        setError('Unable to refresh dashboard right now. Retrying automatically...');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    initializeServerMixBars();
+    refreshDashboard();
+    setInterval(refreshDashboard, 5000);
+  }());
+</script>
+{% endblock %}

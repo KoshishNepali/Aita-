@@ -1,0 +1,175 @@
+﻿{% extends "products/base.html" %}
+{% load static %}
+
+{% block title %}Aita Sushi - Manage Products{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'accounts/css/admin/manage_products.css' %}" />
+  <style>
+    .base-header {
+      display: none !important;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+{% include "accounts/admin/includes/sidebar.html" %}
+
+  <header class="topbar">
+    <div>
+      <h2 class="topbar-title">Admin Dashboard</h2>
+      <p class="topbar-subtitle">Manage your product catalog and availability</p>
+    </div>
+
+    <div class="topbar-actions">
+      <div class="search-wrap">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <form method="get" action="{% url 'manage_products' %}">
+          <input class="search-input" type="text" name="q" value="{{ query }}" placeholder="Search products..." />
+        </form>
+      </div>
+
+      <div class="user-controls">
+        <button class="icon-btn" type="button" aria-label="Notifications">
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <button class="icon-btn" type="button" aria-label="Settings">
+          <span class="material-symbols-outlined">settings</span>
+        </button>
+
+        <div class="avatar-wrap">
+          <img class="avatar-image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw3KZDdChdsZpfaByAlIqCQLvbTeWRIt83G0DEdeSVzYHnb5tiKTIVyQNXgLWsbhDiO3oyvaNWhiLAizPL5zEYSREW-6kT2Jkoovq_hqVTeBxT9BNuv8AlEPbNAh_6XYqB3aXrP4FKtWnNpPR_mkyFtnmykf1Vy0Ie1J-lJfazqr0k6JxJHVaGZ2o5zq1v0VDW3B8RLDui-btXEY9rOSgKiaTbCpKoWvg0BBg7jzoUbz3UkshV9pVeDOJcsBJtbyzoTYVgvOo8Qw" alt="Administrator" />
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-main">
+    <section class="page-head">
+      <div>
+        <p class="page-kicker">Inventory Control</p>
+        <h3 class="page-title">Manage Products</h3>
+      </div>
+
+      <a class="add-product-btn" href="{% url 'admin_product_create' %}">
+        <span class="material-symbols-outlined">add</span>
+        <span>Add New Product</span>
+      </a>
+    </section>
+
+    <section class="table-panel">
+      <div class="table-wrap">
+        <table class="products-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th class="align-right">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for product in products %}
+              <tr>
+                <td>
+                  <div class="product-cell">
+                    <div class="product-thumb-wrap">
+                      {% if product.image %}
+                        <img class="product-thumb" src="{{ product.image_src }}" alt="{{ product.name }}" />
+                      {% endif %}
+                    </div>
+
+                    <div>
+                      <p class="product-name">{{ product.name }}</p>
+                      <p class="product-id">ID: PRD-{{ product.id }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td><span class="chip">{{ product.category.name }}</span></td>
+                <td><span class="price-text">NPR {{ product.base_price }}</span></td>
+
+                <td>
+                  <div class="status {% if product.is_available %}status-in-stock{% else %}status-out-stock{% endif %}">
+                    <span class="status-dot {% if product.is_available %}status-dot-pulse{% endif %}"></span>
+                    <span>{% if product.is_available %}In Stock{% else %}Out of Stock{% endif %}</span>
+                  </div>
+                </td>
+
+                <td class="align-right">
+                  <div class="row-actions">
+                    <a class="row-action-btn" href="{% url 'admin_product_edit' product.id %}" aria-label="Edit">
+                      <span class="material-symbols-outlined">edit</span>
+                    </a>
+                    <form method="post" action="{% url 'admin_product_delete' product.id %}" onsubmit="return confirm('Delete {{ product.name|escapejs }}?');">
+                      {% csrf_token %}
+                      <button class="row-action-btn is-danger" type="submit" aria-label="Delete">
+                        <span class="material-symbols-outlined">delete</span>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5">
+                  <p class="table-meta" style="text-align:center; margin:0;">No products found. Add your first product.</p>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <p class="table-meta">Showing <strong>{{ displayed_products_count }}</strong> of <strong>{{ total_products }}</strong> products</p>
+
+        <div class="pagination">
+          <button class="page-btn" type="button" disabled>
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <button class="page-btn is-current" type="button">1</button>
+          <button class="page-btn" type="button">2</button>
+          <button class="page-btn" type="button">3</button>
+          <button class="page-btn" type="button">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats-grid">
+      <article class="stat-card">
+        <div class="stat-icon stat-icon-primary">
+          <span class="material-symbols-outlined stat-icon-filled">inventory_2</span>
+        </div>
+        <div>
+          <p class="stat-label">Total Products</p>
+          <h4 class="stat-value">{{ total_products }} Items</h4>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon stat-icon-success">
+          <span class="material-symbols-outlined stat-icon-filled">check_circle</span>
+        </div>
+        <div>
+          <p class="stat-label">Active In Stock</p>
+          <h4 class="stat-value">{{ active_products }} Active</h4>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon stat-icon-warning">
+          <span class="material-symbols-outlined stat-icon-filled">warning</span>
+        </div>
+        <div>
+          <p class="stat-label">Low Inventory</p>
+          <h4 class="stat-value">{{ low_inventory_count }} Alerts</h4>
+        </div>
+      </article>
+    </section>
+  </main>
+{% endblock %}

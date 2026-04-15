@@ -1,0 +1,502 @@
+﻿{% extends "products/base.html" %}
+{% load static %}
+
+{% block title %}User Management | Aita Sushi Admin{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'accounts/css/admin/user_management.css' %}" />
+  <style>
+    .base-header {
+      display: none !important;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+{% include "accounts/admin/includes/sidebar.html" %}
+
+  <main class="main-shell">
+    <header class="topbar">
+      <h2>User Management</h2>
+
+      <div class="topbar-right">
+        <div class="users-live-meta">
+          <span id="users-loading" class="users-loading-spinner" aria-hidden="true"></span>
+          <span id="users-last-updated" class="users-last-updated">Waiting for first sync...</span>
+        </div>
+        <label class="search-wrap" aria-label="Search users">
+          <span class="material-symbols-outlined">search</span>
+          <input id="users-search-input" type="text" placeholder="Search by username or email..." />
+        </label>
+
+        <div class="topbar-actions">
+          <button type="button" class="circle-btn" aria-label="Notifications">
+            <span class="material-symbols-outlined">notifications</span>
+          </button>
+          <button type="button" class="circle-btn" aria-label="Settings">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+          <div class="admin-avatar">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCz6NQLxQP3FIop9hXEhz22fmY4CA9HJ2KadzgndlGMp97AJBWfd77xkzGLqSCQepjCeqWrN5ICDm9y1fDhmAMIb7ixsrZEkn_R7EqF5R5puAzIaagYfxuaIrIV82Ogm_nNMWYdSseorRMRDg6UXCitBHi14IF7M5Dik6XGh3n9ltfG2ElAYm17o62gPIJ5L5H2dumXz2zGM0cz2I-iwqVzj5Y6fpUezCHAG9kMgK4ORG-ChKu7uMMGTlHYo0oiqXhoUhcrzmB1VQ" alt="Administrator" />
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="canvas">
+      <div class="stats-grid">
+        <article class="stat-card">
+          <div class="stat-head">
+            <div>
+              <p class="stat-label">Total Users</p>
+              <h3 id="stat-total-users">0</h3>
+            </div>
+            <span class="material-symbols-outlined stat-icon primary">group</span>
+          </div>
+          <p id="stat-total-meta" class="stat-meta positive">
+            <span class="material-symbols-outlined">sync</span>
+            Live total
+          </p>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-head">
+            <div>
+              <p class="stat-label">Active Now</p>
+              <h3 id="stat-active-now">0</h3>
+            </div>
+            <span class="material-symbols-outlined stat-icon success">bolt</span>
+          </div>
+          <p class="stat-meta">Real-time session count</p>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-head">
+            <div>
+              <p class="stat-label">Admins</p>
+              <h3 id="stat-admins">0</h3>
+            </div>
+            <span class="material-symbols-outlined stat-icon neutral">admin_panel_settings</span>
+          </div>
+          <p class="stat-meta">Authorized access levels</p>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-head">
+            <div>
+              <p class="stat-label">New Today</p>
+              <h3 id="stat-new-today">0</h3>
+            </div>
+            <span class="material-symbols-outlined stat-icon warn">person_add</span>
+          </div>
+          <p class="stat-meta">Pending email verification</p>
+        </article>
+      </div>
+
+      <div class="table-controls">
+        <div class="filter-group">
+          <button class="chip-btn is-selected" type="button" data-role-filter="all">
+            <span class="material-symbols-outlined">filter_list</span>
+            All Users
+          </button>
+          <button class="chip-btn" type="button" data-role-filter="admin">Administrators</button>
+          <button class="chip-btn" type="button" data-role-filter="user">Customers</button>
+        </div>
+
+        <div class="actions-group">
+          <button id="users-export-csv" class="text-btn" type="button">
+            <span class="material-symbols-outlined">download</span>
+            Export CSV
+          </button>
+          <a class="add-btn" href="{% url 'admin_user_create' %}">+ Add New User</a>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div id="users-error" class="users-error" role="alert" hidden></div>
+        <div class="table-scroll">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>User Profile</th>
+                <th>Role</th>
+                <th>Contact Info</th>
+                <th>Joined Date</th>
+                <th>Last Login</th>
+                <th class="align-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body">
+              {% for user in initial_users %}
+                <tr>
+                  <td>
+                    <div class="user-profile">
+                      <div class="user-avatar user-avatar-fallback">{{ user.username|slice:":1"|upper }}</div>
+                      <div>
+                        <p class="user-name">{{ user.username }}</p>
+                        <p class="user-id">ID: #{{ user.id }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="role-pill {% if user.is_staff %}admin{% else %}customer{% endif %}">{% if user.is_staff %}Admin{% else %}User{% endif %}</span></td>
+                  <td>
+                    <p class="contact-main">{{ user.email|default:'No email' }}</p>
+                    <p class="contact-sub">{% if user.is_staff %}Administrator{% else %}Customer{% endif %}</p>
+                  </td>
+                  <td><p class="date-cell">{{ user.date_joined|date:"M d, Y H:i" }}</p></td>
+                  <td><p class="date-cell">{{ user.last_login|date:"M d, Y H:i"|default:'Never' }}</p></td>
+                  <td class="align-right">
+                    <div class="row-actions">
+                      <a class="icon-action" href="{% url 'admin_user_edit' user.id %}" aria-label="Edit user">
+                        <span class="material-symbols-outlined">edit</span>
+                      </a>
+                      <form method="post" action="{% url 'admin_user_delete' user.id %}" onsubmit="return confirm('Delete {{ user.username|escapejs }}?');">
+                        {% csrf_token %}
+                        <button class="icon-action danger" type="submit" aria-label="Delete user">
+                          <span class="material-symbols-outlined">delete</span>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="6" class="users-empty">No users found.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer">
+          <p id="users-count-label">Showing <strong>{{ initial_users|length }}</strong> users</p>
+          <div class="pagination">
+            <button id="users-pager-prev" class="pager-btn" type="button" disabled>
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+
+            <div id="users-page-numbers" class="page-numbers"></div>
+
+            <button id="users-pager-next" class="pager-btn" type="button" disabled>
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="activity-grid">
+        <section class="security-activity">
+          <h4>Recent Security Activity</h4>
+          <div class="activity-card">
+            <div class="activity-row">
+              <div class="activity-left">
+                <span class="dot danger"></span>
+                <p>Account Blocked: User #9921</p>
+              </div>
+              <span class="time">2 hours ago</span>
+            </div>
+            <div class="activity-row">
+              <div class="activity-left">
+                <span class="dot primary"></span>
+                <p>Permission Escalation: Admin Alex R.</p>
+              </div>
+              <span class="time">5 hours ago</span>
+            </div>
+            <div class="activity-row">
+              <div class="activity-left">
+                <span class="dot success"></span>
+                <p>New Admin Invited: Mark Thompson</p>
+              </div>
+              <span class="time">Yesterday</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="insights-section">
+          <h4>System Insights</h4>
+          <article class="insight-card">
+            <div class="insight-glow"></div>
+            <span class="material-symbols-outlined insight-icon">auto_awesome</span>
+            <h5>Security Auto-Audit</h5>
+            <p>System identified 3 users with unusual login patterns from unknown locations. Immediate review recommended.</p>
+            <button type="button">Run Audit Now</button>
+          </article>
+        </section>
+      </div>
+    </section>
+  </main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    const apiUrl = "{% url 'admin_users_data' %}";
+    const tableBody = document.getElementById('users-table-body');
+    const loadingEl = document.getElementById('users-loading');
+    const lastUpdatedEl = document.getElementById('users-last-updated');
+    const countLabel = document.getElementById('users-count-label');
+    const errorEl = document.getElementById('users-error');
+    const searchInput = document.getElementById('users-search-input');
+    const exportCsvButton = document.getElementById('users-export-csv');
+    const roleButtons = Array.from(document.querySelectorAll('.chip-btn[data-role-filter]'));
+    const totalUsersEl = document.getElementById('stat-total-users');
+    const activeNowEl = document.getElementById('stat-active-now');
+    const adminsEl = document.getElementById('stat-admins');
+    const newTodayEl = document.getElementById('stat-new-today');
+    const editUrlTemplate = "{% url 'admin_user_edit' 0 %}";
+    const deleteUrlTemplate = "{% url 'admin_user_delete' 0 %}";
+    const exportCsvUrl = "{% url 'admin_users_export_csv' %}";
+    const csrfToken = "{{ csrf_token }}";
+    const pagerPrevButton = document.getElementById('users-pager-prev');
+    const pagerNextButton = document.getElementById('users-pager-next');
+    const pageNumbersEl = document.getElementById('users-page-numbers');
+    const seenUserIds = new Set();
+    let currentRoleFilter = 'all';
+    let currentPage = 1;
+    const pageSize = 10;
+
+    function setLoading(isLoading) {
+      if (isLoading) {
+        loadingEl.classList.add('is-visible');
+      } else {
+        loadingEl.classList.remove('is-visible');
+      }
+    }
+
+    function setError(message) {
+      if (!message) {
+        errorEl.hidden = true;
+        errorEl.textContent = '';
+        return;
+      }
+      errorEl.hidden = false;
+      errorEl.textContent = message;
+    }
+
+    function setRoleButtonState(role) {
+      roleButtons.forEach((button) => {
+        if (button.dataset.roleFilter === role) {
+          button.classList.add('is-selected');
+        } else {
+          button.classList.remove('is-selected');
+        }
+      });
+    }
+
+    function initials(username) {
+      if (!username) return '--';
+      return username.trim().slice(0, 2).toUpperCase();
+    }
+
+    function formatDate(isoDate) {
+      if (!isoDate) return 'Never';
+      const date = new Date(isoDate);
+      if (Number.isNaN(date.getTime())) return 'Never';
+      return date.toLocaleString();
+    }
+
+    function renderStats(stats) {
+      const safeStats = stats || {};
+      totalUsersEl.textContent = String(safeStats.total_users ?? 0);
+      activeNowEl.textContent = String(safeStats.active_now ?? 0);
+      adminsEl.textContent = String(safeStats.admins ?? 0);
+      newTodayEl.textContent = String(safeStats.new_today ?? 0);
+    }
+
+    function buildVisiblePages(totalPages, page) {
+      const pages = [];
+      if (totalPages <= 7) {
+        for (let i = 1; i <= totalPages; i += 1) {
+          pages.push(i);
+        }
+        return pages;
+      }
+
+      pages.push(1);
+      const left = Math.max(2, page - 1);
+      const right = Math.min(totalPages - 1, page + 1);
+
+      if (left > 2) {
+        pages.push('dots-left');
+      }
+      for (let i = left; i <= right; i += 1) {
+        pages.push(i);
+      }
+      if (right < totalPages - 1) {
+        pages.push('dots-right');
+      }
+
+      pages.push(totalPages);
+      return pages;
+    }
+
+    function renderPagination(pagination) {
+      const page = Number(pagination.page || 1);
+      const totalPages = Number(pagination.total_pages || 1);
+
+      pagerPrevButton.disabled = !pagination.has_prev;
+      pagerNextButton.disabled = !pagination.has_next;
+
+      const visiblePages = buildVisiblePages(totalPages, page);
+      pageNumbersEl.innerHTML = visiblePages.map((entry) => {
+        if (typeof entry !== 'number') {
+          return '<span class="page-dots">...</span>';
+        }
+
+        const activeClass = entry === page ? ' is-current' : '';
+        return `<button class="page-btn${activeClass}" type="button" data-page="${entry}">${entry}</button>`;
+      }).join('');
+    }
+
+    function renderUsers(users, pagination) {
+      if (!Array.isArray(users) || !users.length) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="users-empty">No users found.</td></tr>';
+        countLabel.innerHTML = 'Showing <strong>0</strong> users';
+        return;
+      }
+
+      tableBody.innerHTML = users.map((user) => {
+        const userId = Number(user.id || 0);
+        const isNew = !seenUserIds.has(userId);
+        seenUserIds.add(userId);
+        const rowClass = isNew ? 'user-row-new' : '';
+        const roleClass = user.is_staff ? 'admin' : 'customer';
+        const roleLabel = user.is_staff ? 'Admin' : 'User';
+        const editUrl = editUrlTemplate.replace('/0/edit/', `/${userId}/edit/`);
+        const deleteUrl = deleteUrlTemplate.replace('/0/delete/', `/${userId}/delete/`);
+        return `
+          <tr class="${rowClass}">
+            <td>
+              <div class="user-profile">
+                <div class="user-avatar user-avatar-fallback">${initials(user.username)}</div>
+                <div>
+                  <p class="user-name">${user.username || 'Unknown'}</p>
+                  <p class="user-id">ID: #${userId}</p>
+                </div>
+              </div>
+            </td>
+            <td><span class="role-pill ${roleClass}">${roleLabel}</span></td>
+            <td>
+              <p class="contact-main">${user.email || 'No email'}</p>
+              <p class="contact-sub">${roleLabel}</p>
+            </td>
+            <td><p class="date-cell">${formatDate(user.date_joined)}</p></td>
+            <td><p class="date-cell">${formatDate(user.last_login)}</p></td>
+            <td class="align-right">
+              <div class="row-actions">
+                <a class="icon-action" href="${editUrl}" aria-label="Edit user">
+                  <span class="material-symbols-outlined">edit</span>
+                </a>
+                <form method="post" action="${deleteUrl}" onsubmit="return confirm('Delete this user?');">
+                  <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
+                  <button class="icon-action danger" type="submit" aria-label="Delete user">
+                    <span class="material-symbols-outlined">delete</span>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const safePagination = pagination || {};
+      const start = Number(safePagination.start_index || 1);
+      const end = Number(safePagination.end_index || users.length);
+      const total = Number(safePagination.total_items || users.length);
+      countLabel.innerHTML = `Showing <strong>${start}</strong> to <strong>${end}</strong> of <strong>${total}</strong> users`;
+    }
+
+    async function refreshUsers() {
+      setLoading(true);
+      try {
+        const query = (searchInput.value || '').trim();
+        const params = new URLSearchParams();
+        if (query) params.set('q', query);
+        if (currentRoleFilter !== 'all') params.set('role', currentRoleFilter);
+        params.set('page', String(currentPage));
+        params.set('page_size', String(pageSize));
+
+        const response = await fetch(`${apiUrl}?${params.toString()}`, {
+          method: 'GET',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        const payload = await response.json();
+        const pagination = payload.pagination || {};
+        currentPage = Number(pagination.page || 1);
+        renderUsers(payload.users || [], pagination);
+        renderPagination(pagination);
+        renderStats(payload.stats || {});
+        lastUpdatedEl.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+        setError('');
+      } catch (error) {
+        setError('Unable to refresh users right now. Retrying automatically...');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    roleButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        currentRoleFilter = button.dataset.roleFilter || 'all';
+        setRoleButtonState(currentRoleFilter);
+        currentPage = 1;
+        refreshUsers();
+      });
+    });
+
+    let searchTimer = null;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        currentPage = 1;
+        refreshUsers();
+      }, 280);
+    });
+
+    pagerPrevButton.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage -= 1;
+        refreshUsers();
+      }
+    });
+
+    pagerNextButton.addEventListener('click', () => {
+      currentPage += 1;
+      refreshUsers();
+    });
+
+    pageNumbersEl.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-page]');
+      if (!button) return;
+
+      const targetPage = Number(button.dataset.page || 1);
+      if (!Number.isNaN(targetPage) && targetPage > 0 && targetPage !== currentPage) {
+        currentPage = targetPage;
+        refreshUsers();
+      }
+    });
+
+    exportCsvButton.addEventListener('click', () => {
+      const query = (searchInput.value || '').trim();
+      const params = new URLSearchParams();
+
+      if (query) params.set('q', query);
+      if (currentRoleFilter !== 'all') params.set('role', currentRoleFilter);
+
+      const queryString = params.toString();
+      window.location.href = queryString ? `${exportCsvUrl}?${queryString}` : exportCsvUrl;
+    });
+
+    setRoleButtonState(currentRoleFilter);
+    refreshUsers();
+    setInterval(refreshUsers, 5000);
+  }());
+</script>
+{% endblock %}

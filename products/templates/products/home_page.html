@@ -1,0 +1,183 @@
+{% extends "products/base.html" %}
+{% load static currency %}
+
+{% block title %}Aita Sushi &amp; Pookie House | Fresh Sushi, Cozy Bowls{% endblock %}
+
+{% block page_css %}
+  <link rel="stylesheet" href="{% static 'products/css/home_page.css' %}" />
+{% endblock %}
+
+{% block content %}
+  <main class="main-content">
+    <section class="hero-section page-container">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <h1 class="hero-title">
+            Fresh Sushi,<br />
+            <span class="hero-accent">Cozy Bowls</span>
+          </h1>
+
+          <p class="hero-description">
+            Experience the art of Japanese minimalism on a plate. From hand-rolled nigiri to our signature warm pookie bowls.
+          </p>
+
+          <div class="hero-actions">
+            <a href="{% url 'cart' %}" class="btn btn-primary btn-large">Order Now</a>
+            <a href="{% url 'menu' %}" class="btn btn-ghost btn-large">View Menu</a>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="hero-image-stack">
+            <div class="hero-image-card hero-image-top">
+              <img class="media-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqDSM8-Fv4bzaGEBLz2A04vBRSC2KChJD1uspVWLDmGOp8tPFFCo0LA4Opo8eGQ_Ud4l1W2mDPOK_v65BScEqHwpT8VXkq3Yok2h1DpRNQMHen2CxpAi5YfnJcylugyXzbLgO5dqiQp1GxY-p_QnCADrYBgmCk0jD0kxtWTqNpYspdonnX-fgBGeK_BS6-RqPW5PISv2YKYOwy4lTkoaFVGH1xO7ZH-SjDNn8w2kiXsaPAiMMRW73KLkunadZEWXfsSOtXmUKHpA" alt="Premium assorted nigiri sushi on a textured ceramic plate" />
+            </div>
+
+            <div class="hero-image-card hero-image-bottom">
+              <img class="media-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHlDlC1V99AYtzGkV4Vx56H5ZdqrP_XBOnrboYe5WMocl5NmjBVT_HtDCp7OpBZ6rle_PS62Gi1hR1EMMoTUTw2W-AhejDadk_75B65EohsF-e4BlqFk_3ZSpCgaz8rTbYKI7N_MXBQTIfM3xfwm8HnO9uYLD5Ma7Fflmo999RYeuhsHsO4J8GM7cgRstw3zhpSHUEDPTKhuYekIBGbnlywvZCA-CWqDRB7KlDI0V1tLO9itRCvNklqvT7Nw0Pv2GsZuz1QQkEzg" alt="Healthy poke bowl with tuna, avocado, and sesame" />
+            </div>
+
+            <div class="hero-glow"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="featured-section">
+      <div class="page-container">
+        <div class="featured-head">
+          <div class="featured-head-copy">
+            <p class="featured-kicker">Our Curated Selection</p>
+            <h2 class="featured-title">Artisanal Masterpieces</h2>
+          </div>
+
+          <div class="filter-pill-group">
+            <a class="filter-pill {% if current_category == 'all' %}is-active{% endif %}" href="?category=all">All Items</a>
+            <a class="filter-pill {% if current_category == 'sushi' %}is-active{% endif %}" href="?category=sushi">Sushi</a>
+            <a class="filter-pill {% if current_category == 'bowls' %}is-active{% endif %}" href="?category=bowls">Bowls</a>
+          </div>
+        </div>
+
+        <div class="product-grid">
+          {% for product in products %}
+            <article class="product-card">
+              <div class="product-image-wrap">
+                {% if product.image %}
+                  <img class="media-cover product-image" src="{{ product.image_src }}" alt="{{ product.name }}" />
+                {% else %}
+                  <div class="product-image-placeholder">No image</div>
+                {% endif %}
+              </div>
+
+              <div class="product-body">
+                <div class="product-header">
+                  <a href="{% url 'product_detail' product.id %}" class="product-name-link">
+                    <h3 class="product-name">{{ product.name }}</h3>
+                  </a>
+                  <span class="product-price">{{ product.base_price|npr }}</span>
+                </div>
+
+                <p class="product-description">{{ product.description|truncatewords:20 }}</p>
+                <p class="product-category">{{ product.category.name }}</p>
+
+                <a href="{% url 'product_detail' product.id %}" class="add-cart-btn">
+                  <span class="material-symbols-outlined">add_shopping_cart</span>
+                  <span>View Details</span>
+                </a>
+              </div>
+            </article>
+          {% empty %}
+            <div class="no-products">
+              <p>No products available in this category.</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="experience-section page-container">
+      <div class="experience-card">
+        <div class="experience-grid">
+          <div class="experience-copy">
+            <h2 class="experience-title">The <span class="experience-accent">Ma</span> Experience</h2>
+            <p class="experience-description">
+              Inspired by the Japanese concept of Ma, the pure intentionality of negative space, Aita Sushi &amp; Pookie House is more than a restaurant. It is a sanctuary for the senses.
+            </p>
+
+            <div class="experience-points">
+              <div class="point-item">
+                <div class="point-icon-wrap">
+                  <span class="material-symbols-outlined">temp_preferences_custom</span>
+                </div>
+                <div>
+                  <h4 class="point-title">Mindful Sourcing</h4>
+                  <p class="point-text">We partner with local fishermen for daily fresh catches.</p>
+                </div>
+              </div>
+
+              <div class="point-item">
+                <div class="point-icon-wrap">
+                  <span class="material-symbols-outlined">eco</span>
+                </div>
+                <div>
+                  <h4 class="point-title">Sustainable Roots</h4>
+                  <p class="point-text">100% compostable packaging for all pookie bowl deliveries.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="experience-media-wrap">
+            <img class="media-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9pNNgeVlGqTCMnkvdXFiAAamZ3CrUdfzerU8Lv05kFOBB2OeNHzCYyiCa25H-7U7QTVevcdGvOvbcCE5qT6aTbee9XNtOWzofCBYUZd2tpaObiAfx4fmVZiK139KxDwQtHBzBJC7_33rb8XKUty7-fQdipBeEwy2Rjhpbw3GYlrjWL6q9q_I6eHXUHjXSi3o6BQK8VakquFVZmKBbZ_OoVM5uXuXLJ2uNFkVV7HxkEepgjphQFpTG1Hs-viAuF-svEgvTR4Nu-w" alt="Modern Japanese restaurant interior with warm ambient lighting" />
+          </div>
+        </div>
+
+        <div class="experience-glow"></div>
+      </div>
+    </section>
+
+    <div class="mobile-order-badge">
+      <div class="mobile-order-pill">
+        <div class="mobile-basket-wrap">
+          <span class="material-symbols-outlined">shopping_basket</span>
+          <span class="mobile-order-count">2</span>
+        </div>
+        <span class="mobile-order-text">View Order</span>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner page-container">
+      <div class="footer-brand-block">
+        <div class="footer-brand">Aita Sushi</div>
+        <p class="footer-brand-text">
+          Crafting moments of peace through authentic flavors and intentional design since 2024.
+        </p>
+      </div>
+
+      <div class="footer-links-group">
+        <div class="footer-links-column">
+          <span class="footer-links-title">Explore</span>
+          <a class="footer-link" href="#">Menu</a>
+          <a class="footer-link" href="#">Orders</a>
+          <a class="footer-link" href="#">Contact</a>
+        </div>
+
+        <div class="footer-links-column">
+          <span class="footer-links-title">Legal</span>
+          <a class="footer-link" href="#">Privacy</a>
+          <a class="footer-link" href="#">Terms</a>
+        </div>
+      </div>
+
+      <div class="footer-newsletter">
+        <span class="footer-links-title">Join the House</span>
+        <div class="newsletter-row">
+          <input class="newsletter-input" type="email" placeholder="Your email" />
+          <button class="btn btn-primary btn-pill" type="button">Subscribe</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+{% endblock %}

@@ -1,0 +1,4 @@
+﻿import os; os.environ.setdefault('DJANGO_SETTINGS_MODULE','aita_sushi.settings'); import django; django.setup(); from django.contrib.auth import get_user_model; from django.test import Client; U=get_user_model(); admin=U.objects.filter(is_staff=True).first()
+if not admin:
+    admin=U.objects.create_user(username='copilot_admin_csv', email='copilot_admin_csv@example.com', password='TempPass123!', phone='', address=''); admin.is_staff=True; setattr(admin,'is_admin',True) if hasattr(admin,'is_admin') else None; admin.save()
+c=Client(HTTP_HOST='localhost'); c.force_login(admin); r=c.get('/accounts/admin-users-export-csv/?role=user&q='); print('status', r.status_code); print('content_type', r.get('Content-Type')); print('disposition', r.get('Content-Disposition')); lines=r.content.decode('utf-8', errors='ignore').splitlines(); print('line_count', len(lines)); print('header', lines[0] if lines else '')

@@ -1,0 +1,346 @@
+﻿{% extends "products/base.html" %}
+{% load static %}
+
+{% block title %}Aita Sushi - Orders Management{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'accounts/css/admin/order_management.css' %}" />
+  <style>
+    .base-header {
+      display: none !important;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+{% include "accounts/admin/includes/sidebar.html" %}
+
+  <main class="dashboard-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2 class="topbar-title">Admin Dashboard</h2>
+      </div>
+
+      <div class="topbar-right">
+        <div class="orders-live-meta">
+          <span id="orders-loading" class="orders-loading-spinner" aria-hidden="true"></span>
+          <span id="orders-last-updated" class="orders-last-updated">Waiting for first sync...</span>
+        </div>
+        <label class="search-wrap" aria-label="Search orders">
+          <span class="material-symbols-outlined search-icon">search</span>
+          <input class="search-input" type="text" placeholder="Search orders..." />
+        </label>
+
+        <div class="topbar-actions">
+          <button class="icon-action" type="button" aria-label="Notifications">
+            <span class="material-symbols-outlined">notifications</span>
+          </button>
+          <button class="icon-action" type="button" aria-label="Settings">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+          <div class="avatar-wrap">
+            <img
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJm8VU8Wyd6exw1ZEs4At05qxiqXUle58nMDLs-wNjKpbrnijbH3gYCEgoAHMatro3LsbYDNdXEZbPv_GWUS_8mezCpGlUC2zRKAi-aDu4s6ZECVmFBYaQNOS0wJH7gUXtEFaAyMIDKnPMOOUBaQuFdrWSsozPn4cZa2pwzsGJsrSblbDODZ5_jH3PLJ7l2LJqMTMH5ZZjvhleMc6VygxGAfhIrW6siZyoaBBOLUDlGO-71S1sdcYbr2JNDshdhcQf-7U92HfUJw"
+              alt="Administrator profile"
+            />
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="topbar-divider"></div>
+
+    <section class="content-wrap">
+      <div class="section-head">
+        <div class="section-copy">
+          <h3 class="page-title">Order Management</h3>
+          <p class="page-subtitle">Review and process recent incoming customer requests.</p>
+        </div>
+
+        <div class="filter-pills">
+          <button class="pill-btn is-selected" type="button" data-filter="all">All Orders</button>
+          <button class="pill-btn" type="button" data-filter="pending">Pending</button>
+          <button class="pill-btn" type="button" data-filter="processing">Processing</button>
+          <button class="pill-btn" type="button" data-filter="completed">Completed</button>
+        </div>
+      </div>
+
+      <div class="orders-card">
+        <div id="orders-error" class="orders-error" role="alert" hidden></div>
+        <div class="orders-table-scroll">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody id="orders-table-body">
+              {% for order in initial_orders %}
+                <tr>
+                  <td class="order-id">#ORD-{{ order.id }}</td>
+                  <td>
+                    <div class="customer-cell">
+                      <div class="customer-badge badge-primary">{{ order.user.username|slice:":1"|upper }}</div>
+                      <div>
+                        <div class="customer-name">{{ order.user.username }}</div>
+                        <div class="customer-email">{{ order.user.email|default:'No email' }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="secondary-text">{{ order.created_at|date:"M d, Y H:i" }}</td>
+                  <td class="order-total">NPR {{ order.total_amount }}</td>
+                  <td>
+                    <span class="status-chip {{ order.status|lower }}">
+                      <span class="status-dot"></span>
+                      {{ order.status|title }}
+                    </span>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="5" class="orders-empty">No orders found.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination-bar">
+          <p id="orders-count-label" class="pagination-label">Showing latest {{ initial_orders|length }} orders</p>
+          <div class="pagination-actions">
+            <button class="pager-btn" type="button" disabled aria-label="Previous page">
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button class="page-btn is-current" type="button">1</button>
+            <button class="page-btn" type="button">2</button>
+            <button class="page-btn" type="button">3</button>
+            <button class="pager-btn" type="button" aria-label="Next page">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <section class="stats-grid">
+        <article class="stat-card stat-primary">
+          <p class="stat-label">Daily Revenue</p>
+          <h4 id="stat-daily-revenue" class="stat-value">NPR 0.00</h4>
+          <div id="stat-revenue-meta" class="stat-meta positive">
+            <span class="material-symbols-outlined">trending_up</span>
+            <span id="stat-revenue-meta-text">0.0% vs yesterday</span>
+          </div>
+        </article>
+
+        <article class="stat-card stat-tertiary">
+          <p class="stat-label">Average Prep Time</p>
+          <h4 id="stat-prep-time" class="stat-value">0.0 min</h4>
+          <div class="stat-meta positive">
+            <span class="material-symbols-outlined">bolt</span>
+            <span id="stat-prep-meta-text">Based on current order volume</span>
+          </div>
+        </article>
+
+        <article class="stat-card stat-amber">
+          <p class="stat-label">Customer Loyalty</p>
+          <h4 id="stat-loyalty" class="stat-value">0%</h4>
+          <div class="stat-meta muted">
+            <span class="material-symbols-outlined">group</span>
+            <span id="stat-loyalty-meta-text">Recurring customers</span>
+          </div>
+        </article>
+      </section>
+    </section>
+  </main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    const apiUrl = "{% url 'admin_orders_data' %}";
+    const tableBody = document.getElementById('orders-table-body');
+    const loadingEl = document.getElementById('orders-loading');
+    const errorEl = document.getElementById('orders-error');
+    const countLabel = document.getElementById('orders-count-label');
+    const lastUpdatedEl = document.getElementById('orders-last-updated');
+    const filterButtons = Array.from(document.querySelectorAll('.pill-btn[data-filter]'));
+    const dailyRevenueEl = document.getElementById('stat-daily-revenue');
+    const revenueMetaEl = document.getElementById('stat-revenue-meta');
+    const revenueMetaTextEl = document.getElementById('stat-revenue-meta-text');
+    const prepTimeEl = document.getElementById('stat-prep-time');
+    const prepMetaTextEl = document.getElementById('stat-prep-meta-text');
+    const loyaltyEl = document.getElementById('stat-loyalty');
+    const loyaltyMetaTextEl = document.getElementById('stat-loyalty-meta-text');
+    const seenOrderIds = new Set();
+    let currentFilter = 'all';
+
+    function toNpr(value) {
+      return `NPR ${Number(value || 0).toFixed(2)}`;
+    }
+
+    function initials(name) {
+      if (!name) return '--';
+      const parts = name.trim().split(/\s+/).filter(Boolean);
+      return parts.slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join('') || name.slice(0, 2).toUpperCase();
+    }
+
+    function statusClass(status) {
+      const normalized = String(status || '').toLowerCase();
+      if (normalized === 'completed') return 'completed';
+      if (normalized === 'cancelled') return 'cancelled';
+      return 'pending';
+    }
+
+    function formatDate(isoDate) {
+      if (!isoDate) return '-';
+      const date = new Date(isoDate);
+      if (Number.isNaN(date.getTime())) return '-';
+      return date.toLocaleString();
+    }
+
+    function setLoading(isLoading) {
+      if (isLoading) {
+        loadingEl.classList.add('is-visible');
+      } else {
+        loadingEl.classList.remove('is-visible');
+      }
+    }
+
+    function setError(message) {
+      if (!message) {
+        errorEl.hidden = true;
+        errorEl.textContent = '';
+        return;
+      }
+      errorEl.hidden = false;
+      errorEl.textContent = message;
+    }
+
+    function setActiveFilterButton(nextFilter) {
+      filterButtons.forEach((button) => {
+        if (button.dataset.filter === nextFilter) {
+          button.classList.add('is-selected');
+        } else {
+          button.classList.remove('is-selected');
+        }
+      });
+    }
+
+    function renderOrders(orders) {
+      const source = Array.isArray(orders) ? orders : [];
+      const filteredOrders = currentFilter === 'all'
+        ? source
+        : source.filter((order) => String(order.status || '').toLowerCase() === currentFilter);
+
+      if (!filteredOrders.length) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="orders-empty">No orders found.</td></tr>';
+        countLabel.textContent = `Showing ${currentFilter === 'all' ? 'latest' : currentFilter} 0 orders`;
+        return;
+      }
+
+      tableBody.innerHTML = filteredOrders.map((order) => {
+        const orderId = Number(order.order_id || 0);
+        const isNew = !seenOrderIds.has(orderId);
+        seenOrderIds.add(orderId);
+        const rowClass = isNew ? 'order-row-new' : '';
+        const customerName = order.user || 'Unknown User';
+        const customerEmail = order.user_email || 'No email';
+        const status = String(order.status || 'pending').toLowerCase();
+        return `
+          <tr class="${rowClass}">
+            <td class="order-id">#ORD-${orderId}</td>
+            <td>
+              <div class="customer-cell">
+                <div class="customer-badge badge-primary">${initials(customerName)}</div>
+                <div>
+                  <div class="customer-name">${customerName}</div>
+                  <div class="customer-email">${customerEmail}</div>
+                </div>
+              </div>
+            </td>
+            <td class="secondary-text">${formatDate(order.created_at)}</td>
+            <td class="order-total">${toNpr(order.total_amount)}</td>
+            <td>
+              <span class="status-chip ${statusClass(status)}">
+                <span class="status-dot"></span>
+                ${status.charAt(0).toUpperCase() + status.slice(1)}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      if (currentFilter === 'all') {
+        countLabel.textContent = `Showing latest ${filteredOrders.length} orders`;
+      } else {
+        countLabel.textContent = `Showing ${currentFilter} ${filteredOrders.length} orders`;
+      }
+    }
+
+    function renderStats(stats) {
+      const safeStats = stats || {};
+      const dailyRevenue = Number(safeStats.daily_revenue || 0);
+      const changePct = Number(safeStats.revenue_change_pct || 0);
+      const prepTime = Number(safeStats.avg_prep_time_minutes || 0);
+      const loyaltyPct = Number(safeStats.customer_loyalty_pct || 0);
+
+      dailyRevenueEl.textContent = toNpr(dailyRevenue);
+      prepTimeEl.textContent = `${prepTime.toFixed(1)} min`;
+      loyaltyEl.textContent = `${loyaltyPct.toFixed(1)}%`;
+
+      revenueMetaTextEl.textContent = `${Math.abs(changePct).toFixed(1)}% vs yesterday`;
+      if (changePct >= 0) {
+        revenueMetaEl.classList.remove('muted');
+        revenueMetaEl.classList.add('positive');
+      } else {
+        revenueMetaEl.classList.remove('positive');
+        revenueMetaEl.classList.add('muted');
+      }
+
+      prepMetaTextEl.textContent = 'Based on current order volume';
+      loyaltyMetaTextEl.textContent = 'Recurring customers';
+    }
+
+    async function refreshOrders() {
+      setLoading(true);
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        const payload = await response.json();
+        renderOrders(payload.orders || []);
+        renderStats(payload.stats || {});
+        lastUpdatedEl.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+        setError('');
+      } catch (error) {
+        setError('Unable to refresh orders right now. Retrying automatically...');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    filterButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        currentFilter = button.dataset.filter || 'all';
+        setActiveFilterButton(currentFilter);
+        refreshOrders();
+      });
+    });
+
+    setActiveFilterButton(currentFilter);
+    refreshOrders();
+    setInterval(refreshOrders, 5000);
+  }());
+</script>
+{% endblock %}

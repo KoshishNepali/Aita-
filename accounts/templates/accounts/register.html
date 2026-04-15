@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Register | Aita Sushi &amp; Pookie House{% endblock %}
+
+{% block page_css %}
+  <link rel="stylesheet" href="{% static 'accounts/css/register.css' %}" />
+{% endblock %}
+
+{% block content %}
+<header class="site-header">
+  <div class="header-inner page-shell">
+    <div class="brand">Aita Sushi &amp; Pookie House</div>
+
+    <nav class="header-nav">
+      <a class="back-link" href="/">Back to Home</a>
+    </nav>
+  </div>
+</header>
+
+<main class="register-main">
+  <section class="register-shell page-shell">
+    <div class="register-card">
+      <div class="visual-column">
+        <img
+          class="visual-image"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbzw8bsKIS-s9I8WHHHjxT9Cg1g2-FShSv9G87WQ7yDiQ3X_QdWC-lv1Y6PLn-cMOapStVQQaHtM-3uj87Er6lyQPDGBsPglscMReivin2SzSHEGQd6EO_RMWBAZch6PVzHZ-dzgint1Ea2Us54CMfMLBV0rWQdO9HmJvrtcV2YLMQAgxZGe8qkaxvJNwfnog9HXgad7qoccAaPVRgAQuKlrBnr8E5UezHLSZcnNgTT0HZhKYasKBhcVWStTmqm1lIx1Lv_iS6AA"
+          alt="Signature Sushi Plating"
+        />
+        <div class="visual-overlay">
+          <h2>Begin your <br />culinary journey.</h2>
+          <p>Join our family and experience the perfect harmony of traditional sushi and modern comfort.</p>
+        </div>
+      </div>
+
+      <div class="form-column">
+        <div class="form-head">
+          <h1>Create Account</h1>
+          <p>Join the Aita Sushi family today.</p>
+        </div>
+
+        {% if messages %}
+          {% for message in messages %}
+            <p class="error-message">{{ message }}</p>
+          {% endfor %}
+        {% endif %}
+
+        <form class="register-form" action="{% url 'register' %}" method="post">
+          {% csrf_token %}
+          <div class="field-group">
+            <label for="username">Username</label>
+            {{ form.username }}
+            {% for error in form.username.errors %}
+              <p class="error-message">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <div class="field-group">
+            <label for="email">Email Address</label>
+            {{ form.email }}
+            {% for error in form.email.errors %}
+              <p class="error-message">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <div class="field-group">
+            <label for="role">Role</label>
+            {{ form.role }}
+            {% for error in form.role.errors %}
+              <p class="error-message">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <div class="field-group">
+            <label for="password">Password</label>
+            {{ form.password }}
+            {% for error in form.password.errors %}
+              <p class="error-message">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <div class="field-group">
+            <label for="confirm_password">Confirm Password</label>
+            {{ form.confirm_password }}
+            {% for error in form.confirm_password.errors %}
+              <p class="error-message">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <button class="register-btn" type="submit">Register</button>
+
+          <p class="login-row">
+            Already have an account?
+            <a href="/accounts/login/">Login</a>
+          </p>
+        </form>
+
+        <div class="trust-strip">
+          <span class="trust-item">
+            <span class="material-symbols-outlined">verified_user</span>
+            Secure SSL
+          </span>
+          <span class="trust-item">
+            <span class="material-symbols-outlined">shield</span>
+            Data Privacy
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner page-shell">
+    <p class="copyright">&copy; 2024 Aita Sushi &amp; Pookie House. All rights reserved.</p>
+
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">Accessibility</a>
+    </div>
+  </div>
+</footer>
+{% endblock %}

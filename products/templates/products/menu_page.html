@@ -1,0 +1,102 @@
+{% extends "products/base.html" %}
+{% load static currency %}
+
+{% block title %}Menu{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'products/css/menu_page.css' %}" />
+{% endblock %}
+
+{% block content %}
+<main class="menu-page">
+  <section class="menu-hero">
+    <div class="menu-container">
+      <p class="menu-kicker">Aita Sushi</p>
+      <h1 class="menu-title">Our Menu</h1>
+      <p class="menu-subtitle">Freshly prepared dishes crafted from premium ingredients.</p>
+    </div>
+  </section>
+
+  <section class="menu-section">
+    <div class="menu-container">
+      <h2 class="category-title">Signature Sushi Rolls</h2>
+      <div class="menu-grid">
+        {% for product in sushi_products %}
+          <article class="menu-card">
+            {% if product.image %}
+              <img class="item-image" src="{{ product.image_src }}" alt="{{ product.name }}" />
+            {% endif %}
+            <h3 class="item-name">{{ product.name }}</h3>
+            <p class="item-desc">{{ product.description|default:'Freshly prepared by our chefs.' }}</p>
+            <p class="item-price">{{ product.base_price|npr }}</p>
+            <a class="item-link" href="{% url 'product_detail' product.id %}">
+              <span class="material-symbols-outlined">add_shopping_cart</span>
+              <span>View Details</span>
+            </a>
+          </article>
+        {% empty %}
+          <p class="menu-empty">No sushi items found.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="menu-section alt">
+    <div class="menu-container">
+      <h2 class="category-title">Bowls &amp; Noodles</h2>
+      <div class="menu-grid">
+        {% for product in bowl_products %}
+          <article class="menu-card">
+            {% if product.image %}
+              <img class="item-image" src="{{ product.image_src }}" alt="{{ product.name }}" />
+            {% endif %}
+            <h3 class="item-name">{{ product.name }}</h3>
+            <p class="item-desc">{{ product.description|default:'Freshly prepared by our chefs.' }}</p>
+            <p class="item-price">{{ product.base_price|npr }}</p>
+            <a class="item-link" href="{% url 'product_detail' product.id %}">
+              <span class="material-symbols-outlined">add_shopping_cart</span>
+              <span>View Details</span>
+            </a>
+          </article>
+        {% empty %}
+          <p class="menu-empty">No bowl items found.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner page-container">
+    <div class="footer-brand-block">
+      <div class="footer-brand">Aita Sushi</div>
+      <p class="footer-brand-text">
+        Crafting moments of peace through authentic flavors and intentional design since 2024.
+      </p>
+    </div>
+
+    <div class="footer-links-group">
+      <div class="footer-links-column">
+        <span class="footer-links-title">Explore</span>
+        <a class="footer-link" href="{% url 'menu' %}">Menu</a>
+        <a class="footer-link" href="{% url 'orders' %}">Orders</a>
+        <a class="footer-link" href="#">Contact</a>
+      </div>
+
+      <div class="footer-links-column">
+        <span class="footer-links-title">Legal</span>
+        <a class="footer-link" href="#">Privacy</a>
+        <a class="footer-link" href="#">Terms</a>
+      </div>
+    </div>
+
+    <div class="footer-newsletter">
+      <span class="footer-links-title">Join the House</span>
+      <div class="newsletter-row">
+        <input class="newsletter-input" type="email" placeholder="Your email" />
+        <button class="btn btn-primary btn-pill" type="button">Subscribe</button>
+      </div>
+    </div>
+  </div>
+</footer>
+{% endblock %}

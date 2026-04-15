@@ -1,0 +1,230 @@
+﻿{% extends "products/base.html" %}
+{% load static currency %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'cart/css/checkout_page.css' %}" />
+{% endblock %}
+
+{% block content %}
+<header class="top-header">
+  <div class="page-container header-inner">
+    <div class="header-side">
+      <a class="back-link" href="{% url 'menu' %}">
+        <span class="material-symbols-outlined">arrow_back</span>
+        <span class="back-text">Back to Menu</span>
+      </a>
+    </div>
+
+    <div class="brand">AitaSushi</div>
+
+    <div class="header-side header-cart">
+      <span class="material-symbols-outlined cart-icon">shopping_cart</span>
+      <span class="cart-count">{{ cart_count }}</span>
+    </div>
+  </div>
+</header>
+
+<main class="checkout-main">
+  <div class="page-container">
+    <section class="checkout-grid">
+      <div class="checkout-details">
+        <h1 class="page-title">Checkout</h1>
+
+        <form method="post" id="checkout-form" class="details-stack">
+          {% csrf_token %}
+
+          <article class="card card-elevated">
+            <h2 class="section-title">
+              <span class="material-symbols-outlined section-icon">location_on</span>
+              Delivery Information
+            </h2>
+
+            <div class="details-form">
+              <div class="field field-full">
+                <label class="field-label" for="full_name">Full Name</label>
+                <input class="field-input" id="full_name" name="full_name" type="text" placeholder="e.g. Satoshi Nakamoto" required />
+              </div>
+
+              <div class="field field-full">
+                <label class="field-label" for="address">Street Address</label>
+                <input class="field-input" id="address" name="address" type="text" placeholder="Apartment, suite, or house number" required />
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="phone_number">Phone Number</label>
+                <input class="field-input" id="phone_number" name="phone_number" type="text" placeholder="+977 980XXXXXXX" />
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="city">City</label>
+                <input class="field-input" id="city" name="city" type="text" placeholder="Kathmandu" />
+              </div>
+            </div>
+          </article>
+
+          <article class="card card-elevated">
+            <h2 class="section-title">
+              <span class="material-symbols-outlined section-icon">payments</span>
+              Payment Method
+            </h2>
+
+            <div class="payment-grid">
+              <label class="payment-option payment-option-selected" for="pm-esewa">
+                <span class="payment-option-left">
+                  <span class="payment-icon-box payment-icon-esewa">
+                    <span class="material-symbols-outlined payment-icon-filled">account_balance_wallet</span>
+                  </span>
+                  <span class="payment-meta">
+                    <span class="payment-name">eSewa</span>
+                    <span class="payment-subtitle">Digital Wallet</span>
+                  </span>
+                </span>
+                <span class="payment-radio payment-radio-selected"><span class="payment-radio-dot"></span></span>
+                <input id="pm-esewa" class="payment-input" type="radio" name="payment_method" value="eSewa" checked />
+              </label>
+
+              <label class="payment-option" for="pm-cod">
+                <span class="payment-option-left">
+                  <span class="payment-icon-box payment-icon-cod">
+                    <span class="material-symbols-outlined">local_atm</span>
+                  </span>
+                  <span class="payment-meta">
+                    <span class="payment-name">Cash on Delivery</span>
+                    <span class="payment-subtitle">Pay at your door</span>
+                  </span>
+                </span>
+                <span class="payment-radio"></span>
+                <input id="pm-cod" class="payment-input" type="radio" name="payment_method" value="Cash on Delivery" />
+              </label>
+            </div>
+          </article>
+        </form>
+
+        <script>
+          // Handle payment method switching
+          const paymentInputs = document.querySelectorAll('.payment-input');
+          const confirmButton = document.querySelector('.confirm-button');
+          
+          function updateButtonText() {
+            const selectedMethod = document.querySelector('.payment-input:checked').value;
+            
+            if (selectedMethod === 'eSewa') {
+              confirmButton.innerHTML = '<span class="material-symbols-outlined">account_balance_wallet</span> Pay with eSewa';
+              confirmButton.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            } else {
+              confirmButton.innerHTML = 'Confirm Order<span class="material-symbols-outlined">chevron_right</span>';
+              confirmButton.style.background = '';
+            }
+          }
+
+          // Add event listeners to payment inputs
+          paymentInputs.forEach(input => {
+            input.addEventListener('change', updateButtonText);
+          });
+
+          // Initialize button text
+          updateButtonText();
+
+          // Handle confirm button click
+          confirmButton.addEventListener('click', function(e) {
+            const selectedMethod = document.querySelector('.payment-input:checked').value;
+            
+            if (selectedMethod === 'eSewa') {
+              e.preventDefault();
+              // Disable button and show loading state
+              confirmButton.disabled = true;
+              confirmButton.innerHTML = '<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">refresh</span> Redirecting to eSewa...';
+              
+              // Submit form after showing the message
+              setTimeout(function() {
+                document.getElementById('checkout-form').submit();
+              }, 300);
+            }
+          });
+
+          // CSS animation for spinner
+          const style = document.createElement('style');
+          style.textContent = `
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `;
+          document.head.appendChild(style);
+        </script>
+      </div>
+
+      <aside class="summary-column">
+        <section class="summary-card">
+          <h2 class="summary-title">Order Summary</h2>
+
+          <div class="summary-items">
+            {% for entry in cart_items %}
+              <article class="summary-item">
+                <div class="summary-item-image-wrap">
+                  {% if entry.item.product.image %}
+                    <img class="summary-item-image" src="{{ entry.item.product.image_src }}" alt="{{ entry.item.product.name }}" />
+                  {% else %}
+                    <div class="summary-item-image"></div>
+                  {% endif %}
+                </div>
+
+                <div class="summary-item-info">
+                  <div class="summary-item-row">
+                    <p class="summary-item-name">{{ entry.item.product.name }}</p>
+                    <p class="summary-item-price">{{ entry.line_total|npr }}</p>
+                  </div>
+                  <p class="summary-item-qty">Qty: {{ entry.item.quantity }}</p>
+                </div>
+              </article>
+            {% empty %}
+              <p class="summary-item-qty">No items in your cart.</p>
+            {% endfor %}
+          </div>
+
+          <div class="price-breakdown">
+            <div class="price-line">
+              <span class="price-label">Subtotal</span>
+              <span>{{ total_amount|npr }}</span>
+            </div>
+            <div class="price-line">
+              <span class="price-label">Delivery Fee</span>
+              <span>{{ delivery_fee|npr }}</span>
+            </div>
+            <div class="price-line">
+              <span class="price-label">Service Tax (5%)</span>
+              <span>{{ service_tax|npr }}</span>
+            </div>
+            <div class="price-line total-line">
+              <span class="total-title">Total</span>
+              <span class="total-value">{{ grand_total|npr }}</span>
+            </div>
+          </div>
+
+          <button form="checkout-form" type="submit" class="confirm-button">
+            Confirm Order
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+
+          <p class="summary-note">By clicking confirm, you agree to our terms of service &amp; privacy policy.</p>
+        </section>
+      </aside>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="page-container footer-inner">
+    <div class="footer-brand">Aita Sushi &amp; Pookie House.</div>
+    <nav class="footer-links">
+      <a class="footer-link" href="{% url 'menu' %}">Menu</a>
+      <a class="footer-link" href="{% url 'orders' %}">Orders</a>
+      <a class="footer-link" href="#">Contact</a>
+      <a class="footer-link" href="#">Privacy</a>
+    </nav>
+    <p class="footer-copy">© 2024 Aita Sushi &amp; Pookie House. Crafted with Ma.</p>
+  </div>
+</footer>
+{% endblock %}

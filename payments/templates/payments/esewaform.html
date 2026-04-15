@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting to eSewa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .payment-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 24px;
+        }
+
+        .spinner-ring {
+            display: inline-block;
+            position: relative;
+            width: 48px;
+            height: 48px;
+        }
+
+        .spinner-ring div {
+            box-sizing: border-box;
+            display: block;
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            margin: 4px;
+            border: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spinner-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+            border-color: #667eea transparent transparent transparent;
+        }
+
+        .spinner-ring div:nth-child(1) {
+            animation-delay: -0.45s;
+        }
+
+        .spinner-ring div:nth-child(2) {
+            animation-delay: -0.3s;
+        }
+
+        .spinner-ring div:nth-child(3) {
+            animation-delay: -0.15s;
+        }
+
+        @keyframes spinner-ring {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .message-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 12px;
+        }
+
+        .message-text {
+            font-size: 14px;
+            color: #718096;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .message-warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #92400e;
+            text-align: left;
+        }
+
+        .hidden-form {
+            display: none;
+        }
+
+        .fallback-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: background 0.3s ease;
+        }
+
+        .fallback-button:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <div class="spinner">
+            <div class="spinner-ring">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+
+        <h1 class="message-title">Redirecting to eSewa</h1>
+        <p class="message-text">
+            Please wait while we securely redirect you to complete your payment with eSewa.
+        </p>
+
+        <div class="message-warning">
+            <strong>Note:</strong> Do not close this page or go back. You will be redirected automatically.
+        </div>
+
+        <!-- Hidden eSewa form that auto-submits -->
+        <form id="esewa-form" class="hidden-form" method="POST" action="{{ esewa_payment_url }}">
+            <input type="hidden" name="amount" value="{{ amount }}">
+            <input type="hidden" name="tax_amount" value="{{ tax_amount }}">
+            <input type="hidden" name="total_amount" value="{{ total_amount }}">
+            <input type="hidden" name="transaction_uuid" value="{{ transaction_uuid }}">
+            <input type="hidden" name="product_code" value="{{ product_code }}">
+            <input type="hidden" name="product_service_charge" value="{{ product_service_charge }}">
+            <input type="hidden" name="product_delivery_charge" value="{{ product_delivery_charge }}">
+            <input type="hidden" name="success_url" value="{{ success_url }}">
+            <input type="hidden" name="failure_url" value="{{ failure_url }}">
+            <input type="hidden" name="signed_field_names" value="{{ signed_field_names }}">
+            <input type="hidden" name="signature" value="{{ signature }}">
+            <button type="submit">If you are not redirected, click here</button>
+        </form>
+
+        <!-- Fallback button -->
+        <button class="fallback-button" onclick="document.getElementById('esewa-form').submit()">
+            Continue to Payment
+        </button>
+    </div>
+
+    <script>
+        // Auto-submit form after 1 second
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const form = document.getElementById('esewa-form');
+                if (form) {
+                    form.submit();
+                }
+            }, 1000);
+        });
+
+        // Prevent going back
+        window.addEventListener('beforeunload', function(e) {
+            return "Payment is in progress. Are you sure you want to leave?";
+        });
+    </script>
+</body>
+</html>

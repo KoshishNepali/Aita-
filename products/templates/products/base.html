@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <style>
+    /* Fallback navbar styles so the nav remains visible even with stale cached CSS. */
+    .base-header { display: block !important; position: sticky; top: 0; z-index: 1000; }
+    .base-navbar { width: 100%; background: rgba(255, 248, 242, 0.8); border-bottom: 1px solid #eaded1; }
+    .base-navbar-inner { max-width: 1200px; margin: 0 auto; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .base-brand { color: #1f2430; text-decoration: none; font-family: "Plus Jakarta Sans", sans-serif; font-weight: 800; }
+    .base-nav-links { display: flex; align-items: center; gap: 1rem; }
+    .base-nav-link { color: #1f2430; text-decoration: none; font-family: "Manrope", sans-serif; font-weight: 600; }
+    .base-nav-icons { display: flex; align-items: center; gap: 0.6rem; }
+    .base-icon-link { width: 2.1rem; height: 2.1rem; border: 1px solid #e6e8ec; border-radius: 999px; background: #fff; color: #1f2430; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+    .flash-wrap { position: fixed; top: 84px; right: 16px; z-index: 1100; display: grid; gap: 0.5rem; width: min(420px, calc(100% - 2rem)); }
+    .flash-message { border-radius: 12px; padding: 0.8rem 1rem; font-family: "Manrope", sans-serif; font-size: 0.92rem; line-height: 1.4; box-shadow: 0 12px 26px rgba(25, 20, 17, 0.14); border: 1px solid transparent; background: #f4f4f5; color: #1f2937; }
+    .flash-message.success { background: #edf7ed; border-color: #b7dfb8; color: #1f5130; }
+    .flash-message.error { background: #fef0f0; border-color: #f2b8b8; color: #8f1d1d; }
+    .flash-message.warning { background: #fff9e6; border-color: #f3dd98; color: #7f5800; }
+    .flash-message.info { background: #eaf4ff; border-color: #bcdcff; color: #0f4c8a; }
+    @media (max-width: 768px) {
+      .base-navbar-inner { flex-wrap: wrap; }
+      .base-nav-links { width: 100%; justify-content: center; order: 3; }
+      .base-nav-icons { margin-left: auto; }
+      .flash-wrap { top: 74px; right: 8px; width: calc(100% - 1rem); }
+    }
+  </style>
+  <link rel="stylesheet" href="{% static 'products/css/base.css' %}?v=20260415b" />
+  {% block page_css %}{% endblock %}
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <header class="base-header">
+    {% include 'includes/navbar.html' %}
+  </header>
+
+  {% if messages %}
+    <div class="flash-wrap" aria-live="polite">
+      {% for message in messages %}
+        {% if forloop.last %}
+          <div class="flash-message {{ message.tags }}" role="status">{{ message }}</div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+
+  {% block footer %}{% endblock %}
+
+  <script>
+    (function () {
+      const flashMessages = document.querySelectorAll('.flash-message');
+      flashMessages.forEach((message) => {
+        setTimeout(() => {
+          message.style.transition = 'opacity 240ms ease, transform 240ms ease';
+          message.style.opacity = '0';
+          message.style.transform = 'translateY(-4px)';
+          setTimeout(() => message.remove(), 260);
+        }, 2800);
+      });
+    }());
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
