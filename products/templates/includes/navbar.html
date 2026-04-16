@@ -3,23 +3,32 @@
     <a class="base-brand" href="{% url 'home' %}">AitaSushi</a>
 
     <div class="base-nav-links">
-      <a class="base-nav-link" href="{% url 'home' %}">Home</a>
-      <a class="base-nav-link" href="{% url 'menu' %}">Menu</a>
-      <a class="base-nav-link" href="{% url 'orders' %}">Orders</a>
+      <a class="base-nav-link {% if request.path == '/' %}is-active{% endif %}" href="{% url 'home' %}">Home</a>
+      <a class="base-nav-link {% if request.path == '/menu/' %}is-active{% endif %}" href="{% url 'menu' %}">Menu</a>
+      <a class="base-nav-link {% if request.path == '/orders/' %}is-active{% endif %}" href="{% url 'orders' %}">Orders</a>
     </div>
 
-    <div class="base-nav-icons">
-      <a class="base-icon-link" href="{% url 'cart' %}" aria-label="Cart">
-        <span class="material-symbols-outlined">shopping_cart</span>
-      </a>
-      {% if user.is_authenticated %}
-        <a class="base-icon-link" href="{% url 'profile' %}" aria-label="Profile">
+    <div class="base-nav-actions">
+      <div class="base-nav-icons">
+        <a class="base-icon-link" href="{% url 'cart' %}" aria-label="Cart">
+          <span class="material-symbols-outlined">shopping_cart</span>
+        </a>
+        <a class="base-icon-link base-icon-link-account" href="{% if user.is_authenticated %}{% url 'profile' %}{% else %}{% url 'login' %}{% endif %}" aria-label="Account">
           <span class="material-symbols-outlined">account_circle</span>
         </a>
+      </div>
+
+      <span class="base-nav-divider" aria-hidden="true"></span>
+
+      {% if user.is_authenticated %}
+        <div class="base-auth-actions">
+          <a class="base-auth-link base-auth-link-danger" href="{% url 'logout' %}">Logout</a>
+        </div>
       {% else %}
-        <a class="base-icon-link" href="{% url 'login' %}" aria-label="Login">
-          <span class="material-symbols-outlined">login</span>
-        </a>
+        <div class="base-auth-actions">
+          <a class="base-auth-link base-auth-link-plain" href="{% url 'login' %}">Login</a>
+          <a class="base-auth-link base-auth-link-primary" href="{% url 'register' %}">Register</a>
+        </div>
       {% endif %}
     </div>
   </div>
