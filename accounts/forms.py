@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
@@ -298,6 +300,38 @@ class AdminProductForm(forms.ModelForm):
         if base_price < 0:
             raise forms.ValidationError('Base price cannot be negative.')
         return base_price
+
+    def clean(self):
+        cleaned_data = super().clean()
+        name = (cleaned_data.get('name') or '').strip()
+        description = (cleaned_data.get('description') or '').strip()
+
+        if name and description and name.casefold() == description.casefold():
+            self.add_error('description', 'Description cannot be the same as product name.')
+
+        return cleaned_data
+
+    def clean_options(self):
+        options = (self.cleaned_data.get('options') or '').strip()
+        option_type = self.cleaned_data.get('option_type')
+
+        if option_type != 'quantity' or not options:
+            return options
+
+        for raw_option in options.split(','):
+            option = raw_option.strip()
+            if not option:
+                continue
+
+            quantity_label = option.split(':', 1)[0].strip()
+            match = re.match(r'^\s*(-?\d+(?:\.\d+)?)', quantity_label)
+
+            if match:
+                quantity_value = float(match.group(1))
+                if quantity_value < 0:
+                    raise forms.ValidationError('Quantity in options cannot be negative.')
+
+        return options
 
 
 class AdminUserCreateForm(forms.Form):

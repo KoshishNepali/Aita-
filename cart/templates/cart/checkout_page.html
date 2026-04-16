@@ -71,7 +71,7 @@
             </h2>
 
             <div class="payment-grid">
-              <label class="payment-option payment-option-selected" for="pm-esewa">
+              <label class="payment-option{% if selected_payment_method == 'esewa' %} payment-option-selected{% endif %}" for="pm-esewa">
                 <span class="payment-option-left">
                   <span class="payment-icon-box payment-icon-esewa">
                     <span class="material-symbols-outlined payment-icon-filled">account_balance_wallet</span>
@@ -81,11 +81,11 @@
                     <span class="payment-subtitle">Digital Wallet</span>
                   </span>
                 </span>
-                <span class="payment-radio payment-radio-selected"><span class="payment-radio-dot"></span></span>
-                <input id="pm-esewa" class="payment-input" type="radio" name="payment_method" value="eSewa" checked />
+                <span class="payment-radio{% if selected_payment_method == 'esewa' %} payment-radio-selected{% endif %}">{% if selected_payment_method == 'esewa' %}<span class="payment-radio-dot"></span>{% endif %}</span>
+                <input id="pm-esewa" class="payment-input" type="radio" name="payment_method" value="esewa" {% if selected_payment_method == 'esewa' %}checked{% endif %} />
               </label>
 
-              <label class="payment-option" for="pm-cod">
+              <label class="payment-option{% if selected_payment_method == 'cod' %} payment-option-selected{% endif %}" for="pm-cod">
                 <span class="payment-option-left">
                   <span class="payment-icon-box payment-icon-cod">
                     <span class="material-symbols-outlined">local_atm</span>
@@ -95,65 +95,12 @@
                     <span class="payment-subtitle">Pay at your door</span>
                   </span>
                 </span>
-                <span class="payment-radio"></span>
-                <input id="pm-cod" class="payment-input" type="radio" name="payment_method" value="Cash on Delivery" />
+                <span class="payment-radio{% if selected_payment_method == 'cod' %} payment-radio-selected{% endif %}">{% if selected_payment_method == 'cod' %}<span class="payment-radio-dot"></span>{% endif %}</span>
+                <input id="pm-cod" class="payment-input" type="radio" name="payment_method" value="cod" {% if selected_payment_method == 'cod' %}checked{% endif %} />
               </label>
             </div>
           </article>
         </form>
-
-        <script>
-          // Handle payment method switching
-          const paymentInputs = document.querySelectorAll('.payment-input');
-          const confirmButton = document.querySelector('.confirm-button');
-          
-          function updateButtonText() {
-            const selectedMethod = document.querySelector('.payment-input:checked').value;
-            
-            if (selectedMethod === 'eSewa') {
-              confirmButton.innerHTML = '<span class="material-symbols-outlined">account_balance_wallet</span> Pay with eSewa';
-              confirmButton.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-            } else {
-              confirmButton.innerHTML = 'Confirm Order<span class="material-symbols-outlined">chevron_right</span>';
-              confirmButton.style.background = '';
-            }
-          }
-
-          // Add event listeners to payment inputs
-          paymentInputs.forEach(input => {
-            input.addEventListener('change', updateButtonText);
-          });
-
-          // Initialize button text
-          updateButtonText();
-
-          // Handle confirm button click
-          confirmButton.addEventListener('click', function(e) {
-            const selectedMethod = document.querySelector('.payment-input:checked').value;
-            
-            if (selectedMethod === 'eSewa') {
-              e.preventDefault();
-              // Disable button and show loading state
-              confirmButton.disabled = true;
-              confirmButton.innerHTML = '<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">refresh</span> Redirecting to eSewa...';
-              
-              // Submit form after showing the message
-              setTimeout(function() {
-                document.getElementById('checkout-form').submit();
-              }, 300);
-            }
-          });
-
-          // CSS animation for spinner
-          const style = document.createElement('style');
-          style.textContent = `
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `;
-          document.head.appendChild(style);
-        </script>
       </div>
 
       <aside class="summary-column">
@@ -227,4 +174,68 @@
     <p class="footer-copy">© 2024 Aita Sushi &amp; Pookie House. Crafted with Ma.</p>
   </div>
 </footer>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const paymentInputs = document.querySelectorAll('.payment-input');
+    const paymentOptions = document.querySelectorAll('.payment-option');
+    const confirmButton = document.querySelector('.confirm-button');
+    const checkoutForm = document.getElementById('checkout-form');
+
+    if (!paymentInputs.length || !confirmButton || !checkoutForm) {
+      return;
+    }
+
+    function syncPaymentUI() {
+      const selectedInput = document.querySelector('.payment-input:checked');
+      if (!selectedInput) {
+        return;
+      }
+
+      paymentOptions.forEach((option) => {
+        const input = option.querySelector('.payment-input');
+        const radio = option.querySelector('.payment-radio');
+        const isSelected = input && input.checked;
+
+        option.classList.toggle('payment-option-selected', !!isSelected);
+        if (radio) {
+          radio.classList.toggle('payment-radio-selected', !!isSelected);
+          radio.innerHTML = isSelected ? '<span class="payment-radio-dot"></span>' : '';
+        }
+      });
+
+      if (selectedInput.value === 'esewa') {
+        confirmButton.innerHTML = '<span class="material-symbols-outlined">account_balance_wallet</span> Pay with eSewa';
+        confirmButton.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+      } else {
+        confirmButton.innerHTML = 'Confirm Order<span class="material-symbols-outlined">chevron_right</span>';
+        confirmButton.style.background = '';
+      }
+    }
+
+    paymentInputs.forEach((input) => {
+      input.addEventListener('change', syncPaymentUI);
+    });
+
+    confirmButton.addEventListener('click', function (event) {
+      const selectedInput = document.querySelector('.payment-input:checked');
+      if (!selectedInput || selectedInput.value !== 'esewa') {
+        return;
+      }
+
+      event.preventDefault();
+      confirmButton.disabled = true;
+      confirmButton.innerHTML = '<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">refresh</span> Redirecting to eSewa...';
+      setTimeout(function () {
+        checkoutForm.submit();
+      }, 300);
+    });
+
+    const style = document.createElement('style');
+    style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+    document.head.appendChild(style);
+
+    syncPaymentUI();
+  });
+</script>
 {% endblock %}

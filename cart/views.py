@@ -28,17 +28,22 @@ def checkout_page_view(request):
 	delivery_fee = Decimal('5.00') if cart_items else Decimal('0.00')
 	service_tax = (total_amount * Decimal('0.05')).quantize(Decimal('0.01'))
 	grand_total = total_amount + delivery_fee + service_tax
+	selected_payment_method = request.session.get('profile_payment_method', 'esewa')
+	if selected_payment_method not in {'esewa', 'cod'}:
+		selected_payment_method = 'esewa'
 
 	if request.method == 'POST' and cart_queryset.exists():
 		full_name = request.POST.get('full_name', '').strip()
 		address = request.POST.get('address', '').strip()
-		payment_method = request.POST.get('payment_method', 'esewa').strip()
+		payment_method = request.POST.get('payment_method', 'esewa').strip().lower()
 
 		if full_name and address:
 			# Map payment method display names to database values
 			payment_method_map = {
+				'esewa': 'esewa',
+				'cod': 'cod',
 				'eSewa': 'esewa',
-				'Cash on Delivery': 'cod',
+				'cash on delivery': 'cod',
 			}
 			payment_method_value = payment_method_map.get(payment_method, 'esewa')
 
@@ -77,5 +82,6 @@ def checkout_page_view(request):
 		'service_tax': service_tax,
 		'grand_total': grand_total,
 		'cart_count': cart_count,
+		'selected_payment_method': selected_payment_method,
 	}
 	return render(request, 'cart/checkout_page.html', context)
